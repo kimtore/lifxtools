@@ -1,7 +1,10 @@
 package lifx
 
 import (
+	"bytes"
 	"testing"
+
+	"github.com/stretchr/testify/assert"
 )
 
 var LightMessage = []byte{
@@ -13,8 +16,10 @@ var LightMessage = []byte{
 }
 
 // assuming the server receives a message like LifxMessage above,
-// the Decode function returns a Payload struct.
-func TestDecode(t *testing.T) {
-	// assrt := assert.New(t)
-
+// the NewDecoder function returns a Frame struct.
+func TestNewDecoder(t *testing.T) {
+	assrt := assert.New(t)
+	r := bytes.NewReader(LightMessage)
+	nd := NewDecoder(r)
+	assrt.NotNil(nd)
 }
