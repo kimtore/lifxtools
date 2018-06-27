@@ -55,13 +55,13 @@ type Payload struct {
 
 func (p *Payload) DecodePayload() (*Message, error) {
 	if p == nil {
-		return
+		return nil, nil
 	}
-
+	return nil, nil
 }
 
 func (p *Payload) EncodePayload() (*Frame, error) {
-
+	return nil, nil
 }
 
 func NewPayloadDecoder(r io.Reader) *Payload {
