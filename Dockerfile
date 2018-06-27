@@ -1,0 +1,6 @@
+FROM scratch
+
+ADD lyslix /
+EXPOSE 56700
+ENV PORT 56700
+ENTRYPOINT ['/lyslix']
