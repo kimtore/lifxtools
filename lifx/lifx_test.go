@@ -1,4 +1,4 @@
-package lysix
+package lifx
 
 import (
 	"testing"
