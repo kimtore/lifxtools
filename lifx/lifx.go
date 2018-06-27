@@ -6,6 +6,25 @@ import (
 	"io/ioutil"
 )
 
+type bitStreamDecoder struct {
+	dataStream []byte
+	read       int // number of bits read
+}
+
+// Decode decodes the bitstream, and reads n bits from the underlying byte array
+func (b *bitStreamDecoder) Decode(n int) []byte {
+	nByte := read / 8 // The byte number in which we are currently positioned
+	bitPos := read % 8
+	data = byteStream[nByte]     // Get the byte which we are going to read from
+	outByte := make([]byte, n/8) // Should be null bytes
+	for i := range n {
+		outByte[i/8] |= data & 2 << i
+	}
+	// TODO - The bits need to reversed if using little endian
+	b.read += n
+	return outByte
+}
+
 type Frame struct {
 	reader      io.Reader // Wrapped input-stream
 	totsize     uint16    // 16 bits - Size of entire message in bytes (including this field)
@@ -36,18 +55,25 @@ func (f *Frame) Decode() (*Payload, error) {
 	if err != nil {
 		return nil, fmt.Errorf("Frame: Decode: error reading input stream: %v", err)
 	}
+	bd := bitStreamDecoder{data: data, read: 0}
 	// Read the total Frame size
-	f.totsize = data[0:1]              // Total frame size
-	orig_to_protocol_bytes = data[2:3] // origin to protocol bytes
+	f.totsize = bd.Decode(16) // Total frame size
 	// Individually extract the bitfields
-	f.origin = orig_to_protocol_bytes & 0XC0      // Extract the first two bits (little endian)
-	f.tagged = orig_to_protocol_bytes & 0X20      // Extract third bit
-	f.addressable = orig_to_protocol_bytes & 0X10 // Fourth
-	f.protocol = orig_to_protocol_bytes & 0X3F    // The remaining twelve bits
-	f.source = data[4:8]
+	f.origin = bd.Decode(2)
+	f.tagged = bd.Decode(1)
+	f.addressable = bd.Decode(1)
+	f.protocol = bd.Decode(12)
+	f.source = bd.Decode(32)
 	// Frame address
-	f.target = data[8:16] // 8 bytes
-	// f.fReserved =
+	f.target = bd.Decode(64)
+	f.fReserved = bd.Decode(1)
+	f.ackRequired = bd.Decode(1)
+	f.reqRequired = bd.Decode(1)
+	f.sequence = bd.Decode(8)
+	// protocol frame
+	f.hReserved1 = bd.Decode(64)
+	f.mtype = bd.Decode(16)
+	f.hReserved2 = bd.Decode(16)
 	return nil, nil
 
 }
