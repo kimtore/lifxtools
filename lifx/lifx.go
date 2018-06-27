@@ -37,9 +37,17 @@ func (f *Frame) Decode() (*Payload, error) {
 		return nil, fmt.Errorf("Frame: Decode: error reading input stream: %v", err)
 	}
 	// Read the total Frame size
-	f.totsize = data[0:1]     // Total frame size
-	orig_protocol = data[2:3] // origin to protocol bytes
+	f.totsize = data[0:1]              // Total frame size
+	orig_to_protocol_bytes = data[2:3] // origin to protocol bytes
 	// Individually extract the bitfields
+	f.origin = orig_to_protocol_bytes & 0XC0      // Extract the first two bits (little endian)
+	f.tagged = orig_to_protocol_bytes & 0X20      // Extract third bit
+	f.addressable = orig_to_protocol_bytes & 0X10 // Fourth
+	f.protocol = orig_to_protocol_bytes & 0X3F    // The remaining twelve bits
+	f.source = data[4:8]
+	// Frame address
+	f.target = data[8:16] // 8 bytes
+	// f.fReserved =
 	return nil, nil
 
 }
