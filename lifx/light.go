@@ -2,6 +2,11 @@ package lifx
 
 // From https://lan.developer.lifx.com/docs/light-messages
 
+import (
+	"encoding/binary"
+	"io"
+)
+
 // HSBK is used to represent the color and color temperature of a light.
 //
 // The color is represented as an HSB (Hue, Saturation, Brightness) value.
@@ -28,4 +33,10 @@ type SetColorMessage struct {
 	Reserved uint8
 	Color    HBSK
 	Duration uint32
+}
+
+func DecodeSetColorMessage(r io.Reader) (*SetColorMessage, error) {
+	m := &SetColorMessage{}
+	err := binary.Read(r, binary.LittleEndian, m)
+	return m, err
 }
