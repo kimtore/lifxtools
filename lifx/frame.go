@@ -39,6 +39,7 @@ type Frame struct {
 	Source      uint32 // 32 bits - Source identifier: unique value set by the client, used by responses
 }
 
+// DecodeFrame reads four bytes from a Reader, and returns the first part of a LIFX header.
 func DecodeFrame(r io.Reader) (*Frame, error) {
 	var err error
 	var w uint16

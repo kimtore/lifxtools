@@ -14,15 +14,36 @@ var frameTests = []struct {
 }{
 	{
 		[]byte{'\x31', '\x00', '\x00', '\x34', '\x00', '\x00', '\x00', '\x00'},
-		lifx.Frame{49, 0, true, true, 1024, 0},
+		lifx.Frame{
+			Size:        49,
+			Origin:      0,
+			Tagged:      true,
+			Addressable: true,
+			Protocol:    1024,
+			Source:      0,
+		},
 	},
 	{
 		[]byte{'\xff', '\x00', '\xaa', '\x7a', '\xd2', '\x02', '\x96', '\x49'},
-		lifx.Frame{255, 1, true, true, 2730, 1234567890},
+		lifx.Frame{
+			Size:        255,
+			Origin:      1,
+			Tagged:      true,
+			Addressable: true,
+			Protocol:    2730,
+			Source:      1234567890,
+		},
 	},
 	{
 		[]byte{'\x11', '\xff', '\x30', '\xcf', '\x01', '\x23', '\x45', '\x67'},
-		lifx.Frame{65297, 3, false, false, 3888, 1732584193},
+		lifx.Frame{
+			Size:        65297,
+			Origin:      3,
+			Tagged:      false,
+			Addressable: false,
+			Protocol:    3888,
+			Source:      1732584193,
+		},
 	},
 }
 
