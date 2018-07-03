@@ -16,7 +16,7 @@ var setColorMessagePayload = []byte{
 // Test that a SetColor message payload is correctly decoded into a SetColorMessage struct.
 func TestLightMessageDecoding(t *testing.T) {
 	a := assert.New(t)
-	r := bytes.NewReader(LightMessagePayload)
+	r := bytes.NewReader(setColorMessagePayload)
 	msg, err := lifx.DecodeSetColorMessage(r)
 	a.Nil(err)
 	a.Equal(uint8(0), msg.Reserved)

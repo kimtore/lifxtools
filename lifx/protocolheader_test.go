@@ -36,7 +36,7 @@ var protocolHeaderTests = []struct {
 	},
 }
 
-// Test that a protocol header is correctly decoded into a FrameAddress struct.
+// Test that a protocol header is correctly decoded into a ProtocolHeader struct.
 func TestDecodeProtocolHeader(t *testing.T) {
 	for _, test := range protocolHeaderTests {
 		a := assert.New(t)
