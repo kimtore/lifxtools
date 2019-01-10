@@ -57,3 +57,16 @@ func TestDecodeFrame(t *testing.T) {
 		a.Equal(test.frame, *f)
 	}
 }
+
+// Test that a frame header is correctly encoded into a byte stream.
+func TestEncodeFrame(t *testing.T) {
+	for _, test := range frameTests {
+		buf := make([]byte, 0, 8)
+		w := bytes.NewBuffer(buf)
+		a := assert.New(t)
+		err := lifx.EncodeFrame(&test.frame, w)
+		a.Equal(8, w.Len())
+		a.Nil(err)
+		a.Equal(test.payload, w.Bytes())
+	}
+}

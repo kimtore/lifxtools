@@ -39,7 +39,7 @@ type Frame struct {
 	Source      uint32 // 32 bits - Source identifier: unique value set by the client, used by responses
 }
 
-// DecodeFrame reads four bytes from a Reader, and returns the first part of a LIFX header.
+// DecodeFrame reads eight bytes from a Reader, and returns the first part of a LIFX header.
 func DecodeFrame(r io.Reader) (*Frame, error) {
 	var err error
 	var w uint16
@@ -63,4 +63,30 @@ func DecodeFrame(r io.Reader) (*Frame, error) {
 	err = binary.Read(r, binary.LittleEndian, &f.Source)
 
 	return f, err
+}
+
+// EncodeFrame writes a frame to a Writer, totaling eight bytes.
+func EncodeFrame(f *Frame, wr io.Writer) (error) {
+	var err error
+	var w uint16
+
+	err = binary.Write(wr, binary.LittleEndian, f.Size)
+	if err != nil {
+		return err
+	}
+
+	// Pack fields into a word of data
+	w |= (uint16(f.Origin & 0x3)) << 14
+	w |= (booltouint16(f.Tagged) & 0x2000)
+	w |= (booltouint16(f.Addressable) & 0x1000)
+	w |= (f.Protocol & 0xfff)
+
+	err = binary.Write(wr, binary.LittleEndian, w)
+	if err != nil {
+		return err
+	}
+
+	err = binary.Write(wr, binary.LittleEndian, f.Source)
+
+	return nil
 }
