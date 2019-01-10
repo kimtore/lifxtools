@@ -45,6 +45,6 @@ func (m *SetColorMessage) Write(w io.Writer) error {
 	return binary.Write(w, binary.LittleEndian, m)
 }
 
-func (m *SetColorMessage) Size() int {
+func (m *SetColorMessage) Len() int {
 	return 13
 }

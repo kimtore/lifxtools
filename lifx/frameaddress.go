@@ -106,3 +106,7 @@ func (f *FrameAddress) Write(w io.Writer) error {
 
 	return binary.Write(w, binary.LittleEndian, f.Sequence)
 }
+
+func (f *FrameAddress) Len() int {
+	return 16
+}

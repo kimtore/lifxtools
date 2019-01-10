@@ -23,3 +23,7 @@ func DecodeProtocolHeader(r io.Reader) (*ProtocolHeader, error) {
 func (p *ProtocolHeader) Write(w io.Writer) error {
 	return binary.Write(w, binary.LittleEndian, p)
 }
+
+func (p *ProtocolHeader) Len() int {
+	return 12
+}

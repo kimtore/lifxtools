@@ -36,6 +36,10 @@ func DecodeHeader(r io.Reader) (*Header, error) {
 	return h, nil
 }
 
+func (h *Header) Len() int {
+	return h.Frame.Len() + h.FrameAddress.Len() + h.ProtocolHeader.Len()
+}
+
 func (h *Header) Write(w io.Writer) error {
 	var err error
 

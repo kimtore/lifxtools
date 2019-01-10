@@ -90,3 +90,7 @@ func (f *Frame) Write(wr io.Writer) error {
 
 	return nil
 }
+
+func (f *Frame) Len() int {
+	return 8
+}
