@@ -19,3 +19,7 @@ func DecodeProtocolHeader(r io.Reader) (*ProtocolHeader, error) {
 	err := binary.Read(r, binary.LittleEndian, h)
 	return h, err
 }
+
+func (p *ProtocolHeader) Write(w io.Writer) error {
+	return binary.Write(w, binary.LittleEndian, p)
+}

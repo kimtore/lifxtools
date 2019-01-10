@@ -40,3 +40,11 @@ func DecodeSetColorMessage(r io.Reader) (*SetColorMessage, error) {
 	err := binary.Read(r, binary.LittleEndian, m)
 	return m, err
 }
+
+func (m *SetColorMessage) Write(w io.Writer) error {
+	return binary.Write(w, binary.LittleEndian, m)
+}
+
+func (m *SetColorMessage) Size() int {
+	return 13
+}

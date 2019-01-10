@@ -64,7 +64,7 @@ func TestEncodeFrame(t *testing.T) {
 		buf := make([]byte, 0, 8)
 		w := bytes.NewBuffer(buf)
 		a := assert.New(t)
-		err := lifx.EncodeFrame(&test.frame, w)
+		err := test.frame.Write(w)
 		a.Equal(8, w.Len())
 		a.Nil(err)
 		a.Equal(test.payload, w.Bytes())

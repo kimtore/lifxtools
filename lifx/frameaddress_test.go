@@ -52,3 +52,16 @@ func TestDecodeFrameAddress(t *testing.T) {
 		a.Equal(test.frameAddress, *f)
 	}
 }
+
+// Test that a frame address header is correctly encoded into a byte stream.
+func TestEncodeFrameAddress(t *testing.T) {
+	for _, test := range frameAddressTests {
+		buf := make([]byte, 0, 16)
+		w := bytes.NewBuffer(buf)
+		a := assert.New(t)
+		err := test.frameAddress.Write(w)
+		a.Equal(16, w.Len())
+		a.Nil(err)
+		a.Equal(test.payload, w.Bytes())
+	}
+}

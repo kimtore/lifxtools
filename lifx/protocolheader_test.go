@@ -46,3 +46,16 @@ func TestDecodeProtocolHeader(t *testing.T) {
 		a.Equal(test.protocolHeader, *f)
 	}
 }
+
+// Test that a frame address header is correctly encoded into a byte stream.
+func TestEncodeProtocolHeader(t *testing.T) {
+	for _, test := range protocolHeaderTests {
+		buf := make([]byte, 0, 12)
+		w := bytes.NewBuffer(buf)
+		a := assert.New(t)
+		err := test.protocolHeader.Write(w)
+		a.Equal(12, w.Len())
+		a.Nil(err)
+		a.Equal(test.payload, w.Bytes())
+	}
+}

@@ -79,3 +79,30 @@ func DecodeFrameAddress(r io.Reader) (*FrameAddress, error) {
 
 	return f, err
 }
+
+func (f *FrameAddress) Write(w io.Writer) error {
+	var err error
+	var b uint8
+
+	err = binary.Write(w, binary.LittleEndian, f.Target)
+	if err != nil {
+		return err
+	}
+
+	err = binary.Write(w, binary.LittleEndian, f.Reserved1)
+	if err != nil {
+		return err
+	}
+
+	// Pack fields into a byte of data
+	b |= ((f.Reserved2 & 0x3f) << 2)
+	b |= (booltouint8(f.AckRequired) & 0x2)
+	b |= (booltouint8(f.ResRequired) & 0x1)
+
+	err = binary.Write(w, binary.LittleEndian, b)
+	if err != nil {
+		return err
+	}
+
+	return binary.Write(w, binary.LittleEndian, f.Sequence)
+}

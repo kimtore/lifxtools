@@ -56,3 +56,16 @@ func TestDecodeHeader(t *testing.T) {
 		a.Equal(test.header, *f)
 	}
 }
+
+// Test that a frame address header is correctly encoded into a byte stream.
+func TestEncodeHeader(t *testing.T) {
+	for _, test := range headerTests {
+		buf := make([]byte, 0, 36)
+		w := bytes.NewBuffer(buf)
+		a := assert.New(t)
+		err := test.header.Write(w)
+		a.Equal(36, w.Len())
+		a.Nil(err)
+		a.Equal(test.payload[:36], w.Bytes())
+	}
+}

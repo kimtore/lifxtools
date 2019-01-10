@@ -35,3 +35,22 @@ func DecodeHeader(r io.Reader) (*Header, error) {
 	}
 	return h, nil
 }
+
+func (h *Header) Write(w io.Writer) error {
+	var err error
+
+	err = h.Frame.Write(w)
+	if err != nil {
+		return err
+	}
+	err = h.FrameAddress.Write(w)
+	if err != nil {
+		return err
+	}
+	err = h.ProtocolHeader.Write(w)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}

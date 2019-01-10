@@ -65,8 +65,8 @@ func DecodeFrame(r io.Reader) (*Frame, error) {
 	return f, err
 }
 
-// EncodeFrame writes a frame to a Writer, totaling eight bytes.
-func EncodeFrame(f *Frame, wr io.Writer) (error) {
+// Write writes a frame to a Writer, totaling eight bytes.
+func (f *Frame) Write(wr io.Writer) error {
 	var err error
 	var w uint16
 
