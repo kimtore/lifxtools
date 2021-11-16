@@ -5,8 +5,9 @@ This service is aimed to be launched in a Docker container running on your netwo
 
 ## Development
 
-Using [dep](https://github.com/golang/dep), install dependencies with:
+Install and compile:
 
 ```
-dep ensure
+go get ./...
+go build
 ```
