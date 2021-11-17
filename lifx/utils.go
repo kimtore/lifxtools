@@ -42,3 +42,12 @@ func WriteString(w io.Writer, s string, length int) (int64, error) {
 	}
 	return io.Copy(w, buf)
 }
+
+func ReadString(r io.Reader, maxLength int) (string, error) {
+	buf := make([]byte, maxLength)
+	_, err := r.Read(buf)
+	if err != nil {
+		return "", err
+	}
+	return strings.Split(string(buf), "\x00")[0], nil
+}

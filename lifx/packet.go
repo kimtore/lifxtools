@@ -24,6 +24,8 @@ func DecodePacket(r io.Reader) (*Packet, error) {
 		return nil, err
 	}
 
+	p := &Packet{}
+
 	// Decode based on message type. Unsupported messages are read according to
 	// size in the header field.
 	switch h.ProtocolHeader.Type {
@@ -31,22 +33,19 @@ func DecodePacket(r io.Reader) (*Packet, error) {
 		payload, err = DecodeSetColorMessage(r)
 	case MsgTypeStateLabel, MsgTypeSetLabel:
 		payload, err = DecodeSetLabelMessage(r)
+	case MsgTypeSetAccessPoint:
+		payload, err = DecodeSetAccessPointMessage(r)
 	default:
 		payloadSize := int(h.Frame.Size) - h.Len()
-		if payloadSize > 0 {
-			buf := make([]byte, 0, payloadSize)
-			_, err = r.Read(buf)
-		}
+		payload, err = DecodeRawPayload(r, payloadSize)
 	}
 
 	if err != nil {
 		return nil, err
 	}
 
-	p := &Packet{
-		Header:  *h,
-		Payload: payload,
-	}
+	p.Header = *h
+	p.Payload = payload
 
 	return p, nil
 }
