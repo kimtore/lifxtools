@@ -48,3 +48,7 @@ func (m *SetColorMessage) Write(w io.Writer) error {
 func (m *SetColorMessage) Len() int {
 	return 13
 }
+
+func (m *SetColorMessage) Type() uint16 {
+	return MsgTypeSetColorMessage
+}

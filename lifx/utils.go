@@ -1,5 +1,11 @@
 package lifx
 
+import (
+	"bytes"
+	"io"
+	"strings"
+)
+
 func booltouint8(b bool) uint8 {
 	if b {
 		return 0xff
@@ -22,4 +28,17 @@ func MACAdressToFrameAddress(mac []byte) uint64 {
 		(uint64(mac[3]) << 24) |
 		(uint64(mac[4]) << 32) |
 		(uint64(mac[5]) << 40)
+}
+
+func WriteString(w io.Writer, s string, length int) (int64, error) {
+	r := strings.NewReader(s)
+	buf := &bytes.Buffer{}
+	_, err := io.CopyN(buf, r, int64(length)-1)
+	if err != nil && err != io.EOF {
+		return int64(buf.Len()), err
+	}
+	for buf.Len() < length {
+		buf.WriteByte(0)
+	}
+	return io.Copy(w, buf)
 }
