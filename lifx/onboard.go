@@ -24,7 +24,7 @@ const (
 type SetAccessPointMessage struct {
 	Reserved1 byte // Really don't know what this is. Set to 0x02 from the example.
 	SSID      string
-	Password  string
+	PSK       string
 	Security  byte
 }
 
@@ -42,7 +42,7 @@ func DecodeSetAccessPointMessage(r io.Reader) (*SetAccessPointMessage, error) {
 		return nil, err
 	}
 
-	msg.Password, err = ReadString(r, WifiPasswordLength)
+	msg.PSK, err = ReadString(r, WifiPasswordLength)
 	if err != nil {
 		return nil, err
 	}
@@ -68,7 +68,7 @@ func (m *SetAccessPointMessage) Write(w io.Writer) error {
 		return err
 	}
 
-	_, err = WriteString(w, m.Password, WifiPasswordLength)
+	_, err = WriteString(w, m.PSK, WifiPasswordLength)
 	if err != nil {
 		return err
 	}

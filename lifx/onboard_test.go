@@ -23,7 +23,7 @@ func TestDecodeOnboardMessage(t *testing.T) {
 	payload := packet.Payload.(*lifx.SetAccessPointMessage)
 	assert.Equal(t, packet.Len(), int(packet.Header.Frame.Size))
 	assert.Equal(t, "ssid", payload.SSID)
-	assert.Equal(t, "pass", payload.Password)
+	assert.Equal(t, "pass", payload.PSK)
 	assert.Equal(t, lifx.Security_WPA2_AES_PSK, payload.Security)
 
 	buf := &bytes.Buffer{}
