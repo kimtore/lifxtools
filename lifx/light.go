@@ -47,7 +47,7 @@ func (m *SetColorMessage) Write(w io.Writer) error {
 }
 
 func (m *SetColorMessage) Len() int {
-	return 13
+	return binary.Size(m)
 }
 
 func (m *SetColorMessage) Type() uint16 {
