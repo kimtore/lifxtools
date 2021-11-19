@@ -13,6 +13,7 @@ import (
 //
 // Will return one StateLabel (25) message.
 type SetLabelMessage struct {
+	emptyMessage
 	Label string
 }
 

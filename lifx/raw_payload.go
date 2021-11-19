@@ -6,6 +6,7 @@ import (
 
 // Catch-all for unknown payload types
 type RawPayload struct {
+	emptyMessage
 	Data []byte
 }
 

@@ -4,8 +4,9 @@ import "io"
 
 type Payload interface {
 	Len() int
-	Write(io.Writer) error
 	Type() uint16
+	Write(io.Writer) error
+	Unmarshal(io.Reader) error
 }
 
 // Packet combines Header and a payload to form a complete LIFX message.
@@ -35,6 +36,9 @@ func DecodePacket(r io.Reader) (*Packet, error) {
 		payload, err = DecodeSetLabelMessage(r)
 	case MsgTypeSetAccessPoint:
 		payload, err = DecodeSetAccessPointMessage(r)
+	case MsgTypeStateVersion:
+		payload = &StateVersionMessage{}
+		err = payload.Unmarshal(r)
 	default:
 		payloadSize := int(h.Frame.Size) - h.Len()
 		payload, err = DecodeRawPayload(r, payloadSize)

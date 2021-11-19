@@ -22,6 +22,7 @@ const (
 //
 // Reverse engineered using https://github.com/tserong/lifx-hacks/blob/master/onboard.py
 type SetAccessPointMessage struct {
+	emptyMessage
 	Reserved1 byte // Really don't know what this is. Set to 0x02 from the example.
 	SSID      string
 	PSK       string

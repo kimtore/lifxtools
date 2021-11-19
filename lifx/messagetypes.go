@@ -2,9 +2,11 @@ package lifx
 
 const (
 	MsgTypeUnknown         = 0
-	MsgTypeSetColorMessage = 102
 	MsgTypeSetLabel        = 24
 	MsgTypeStateLabel      = 25
+	MsgTypeGetVersion      = 32
+	MsgTypeStateVersion    = 33
+	MsgTypeSetColorMessage = 102
 	MsgTypeSetAccessPoint  = 305
 
 	ProtocolNumber     = 1024

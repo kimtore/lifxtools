@@ -30,6 +30,7 @@ type HBSK struct {
 //
 // If the Frame Address res_required field is set to one (1) then the device will transmit a State message.
 type SetColorMessage struct {
+	emptyMessage
 	Reserved uint8
 	Color    HBSK
 	Duration uint32
