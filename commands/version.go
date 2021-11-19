@@ -8,6 +8,7 @@ import (
 	"net"
 
 	"github.com/dorkowscy/lyslix/lifx"
+	"github.com/dorkowscy/lyslix/lifx/version"
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
@@ -44,14 +45,14 @@ var versionCmd = &cobra.Command{
 		}
 
 		fulladdr := viper.GetString("address") + ":56700"
-		log.Infof("Dialing UDP %s...", fulladdr)
+		log.Debugf("Dialing UDP %s...", fulladdr)
 		conn, err := net.Dial("udp", fulladdr)
 		if err != nil {
 			return err
 		}
 		defer conn.Close()
 
-		log.Infof("Sending version info request...")
+		log.Debugf("Sending version info request...")
 		_, err = conn.Write(buf.Bytes())
 		if err != nil {
 			return err
@@ -59,7 +60,7 @@ var versionCmd = &cobra.Command{
 
 		r := bufio.NewReader(conn)
 
-		log.Infof("Decoding response...")
+		log.Debugf("Decoding response...")
 		resp, err := lifx.DecodePacket(r)
 		if err != nil {
 			return err
@@ -70,7 +71,16 @@ var versionCmd = &cobra.Command{
 			return fmt.Errorf("response does not contain version info")
 		}
 
-		log.Infof("vendor=%v product=%v reserved6=%v", state.Vendor, state.Product, state.Reserved6)
+		product, err := version.Lookup(int(state.Vendor), int(state.Product))
+
+		log.Debugf("vendor=%v product=%v reserved6=%v", state.Vendor, state.Product, state.Reserved6)
+
+		if err != nil {
+			log.Warn(err)
+		} else {
+			log.Infof("Bulb reports itself as '%s'", product.Name)
+			log.Infof("Features: %+v", product.Features)
+		}
 
 		return nil
 	},
