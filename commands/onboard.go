@@ -21,6 +21,7 @@ var onboardCmd = &cobra.Command{
 
 Use this command only when connected to a LIFX bulb Wifi network.`,
 	RunE: func(cmd *cobra.Command, args []string) error {
+		viper.BindPFlags(cmd.Flags())
 		cmd.SilenceErrors = true
 
 		ssid := viper.GetString("ssid")
@@ -89,6 +90,4 @@ func init() {
 	onboardCmd.Flags().String("address", "127.16.0.1:56700", "Network address of LIFX bulb")
 	onboardCmd.Flags().String("ssid", "", "Wifi SSID")
 	onboardCmd.Flags().String("psk", "", "Wifi pre-shared key")
-
-	viper.BindPFlags(onboardCmd.Flags())
 }
