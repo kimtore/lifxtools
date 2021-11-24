@@ -87,7 +87,7 @@ func init() {
 	// Cobra supports local flags which will only run when this command
 	// is called directly, e.g.:
 	// onboardCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
-	onboardCmd.Flags().String("address", "127.16.0.1:56700", "Network address of LIFX bulb")
+	onboardCmd.Flags().String("address", "172.16.0.1:56700", "Network address of LIFX bulb")
 	onboardCmd.Flags().String("ssid", "", "Wifi SSID")
 	onboardCmd.Flags().String("psk", "", "Wifi pre-shared key")
 }
