@@ -87,6 +87,9 @@ func (f *Frame) Write(wr io.Writer) error {
 	}
 
 	err = binary.Write(wr, binary.LittleEndian, f.Source)
+	if err != nil {
+		return err
+	}
 
 	return nil
 }
