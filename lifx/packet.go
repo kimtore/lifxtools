@@ -1,6 +1,9 @@
 package lifx
 
-import "io"
+import (
+	"bytes"
+	"io"
+)
 
 type Payload interface {
 	Len() int
@@ -60,18 +63,20 @@ func (p *Packet) Len() int {
 
 func (p *Packet) Write(w io.Writer) error {
 	var err error
+	buf := &bytes.Buffer{}
 
-	err = p.Header.Write(w)
+	err = p.Header.Write(buf)
 	if err != nil {
 		return err
 	}
 
-	err = p.Payload.Write(w)
+	err = p.Payload.Write(buf)
 	if err != nil {
 		return err
 	}
 
-	return nil
+	_, err = io.Copy(w, buf)
+	return err
 }
 
 func (p *Packet) SetSize() {
