@@ -42,8 +42,9 @@ func (c *client) Close() error {
 func (c *client) SetColor(color HBSK, fadeTime time.Duration) error {
 	return c.send(&SetColorMessage{
 		Color:    color,
-		Duration: uint32(fadeTime * time.Millisecond),
+		Duration: uint32(fadeTime.Milliseconds()),
 	})
+
 }
 
 func (c *client) SetColorZones(color HBSK, start, end uint8, fadeTime time.Duration) error {
@@ -51,7 +52,7 @@ func (c *client) SetColorZones(color HBSK, start, end uint8, fadeTime time.Durat
 		StartIndex: start,
 		EndIndex:   end,
 		Color:      color,
-		Duration:   uint32(fadeTime * time.Millisecond),
+		Duration:   uint32(fadeTime.Milliseconds()),
 		Apply:      MultiZoneApply,
 	})
 }
