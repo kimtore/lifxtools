@@ -4,9 +4,10 @@ import (
 	"flag"
 	"fmt"
 	"math/rand"
-	"time"
 
+	"github.com/dorkowscy/lifxtool/pkg/canvas"
 	"github.com/dorkowscy/lyslix/lifx"
+	"github.com/lucasb-eyer/go-colorful"
 )
 
 func main() {
@@ -22,18 +23,16 @@ func main() {
 
 	defer client.Close()
 
-	framerate := time.Second / 10
+	//framerate := time.Second / 10
+	cv := canvas.New(client, 24)
+	cv.Clear()
 
-	rand.Seed(time.Now().UnixNano())
-
-	for hue := uint16(0); hue < lifx.MaxHue; hue += 50 {
-		color := lifx.HBSK{
-			Hue:        hue,
-			Saturation: lifx.FullSaturation,
-			Brightness: lifx.FullBrightness,
-		}
-		fmt.Println(color)
-		client.SetColor(color, 0)
-		time.Sleep(framerate)
+	pixels := cv.Pixels()
+	for i := range pixels {
+		pixels[i] = colorful.Hsl(rand.Float64()*360, rand.Float64(), rand.Float64())
 	}
+
+	fmt.Println(pixels)
+
+	cv.Draw()
 }
