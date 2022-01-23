@@ -34,7 +34,7 @@ func tocolor(color colorful.Color) lifx.HBSK {
 	const max = float64(65535)
 	h, s, l := color.Hsl()
 	return lifx.HBSK{
-		Hue:        uint16(h * max),
+		Hue:        uint16((h / 360) * max),
 		Saturation: uint16(s * max),
 		Brightness: uint16(l * max),
 	}
