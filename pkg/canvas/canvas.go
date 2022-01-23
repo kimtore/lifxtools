@@ -1,6 +1,9 @@
 package canvas
 
 import (
+	"fmt"
+	"time"
+
 	"github.com/dorkowscy/lyslix/lifx"
 	"github.com/lucasb-eyer/go-colorful"
 )
@@ -14,7 +17,7 @@ type canvas struct {
 
 type Canvas interface {
 	Clear()
-	Draw()
+	Draw(fadeTime time.Duration)
 	Pixels() []colorful.Color
 }
 
@@ -45,13 +48,15 @@ func (c *canvas) Clear() {
 	c.client.SetColorZones(lifx.HBSK{}, 0, uint8(c.size-1), 0)
 }
 
-func (c *canvas) Draw() {
+func (c *canvas) Draw(fadeTime time.Duration) {
 	for i, pixel := range c.pixels {
 		hbsk := tocolor(pixel)
 		if c.hbsk[i] == hbsk {
 			continue
 		}
-		c.client.SetColorZones(hbsk, uint8(i), uint8(i), 0)
+		c.hbsk[i] = hbsk
+		c.client.SetColorZones(hbsk, uint8(i), uint8(i), fadeTime)
+		fmt.Printf("SetColorZones(%v, %v, %v, %v)\n", hbsk, uint8(i), uint8(i), fadeTime)
 	}
 }
 
