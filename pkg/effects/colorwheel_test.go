@@ -37,7 +37,7 @@ func printColorHSV(color colorful.Color) {
 }
 
 func TestHCLCircle(t *testing.T) {
-	colors := effects.HCLCircle(0, 0.1, 0.6, 200)
+	colors := effects.HCLCircle(0, 0.3, 0.6, 200)
 	for _, color := range colors {
 		printColorHSV(color)
 	}

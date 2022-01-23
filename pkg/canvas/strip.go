@@ -28,7 +28,7 @@ func NewStrip(client lifx.Client, size int) Canvas {
 }
 
 func (c *strip) setColorZones(color lifx.HBSK, start, end uint8, fadeTime time.Duration) {
-	log.Debugf("SetColorZones(%v, %v, %v, %v..%v, %v)\n", color.Hue, color.Saturation, color.Brightness, start, end, fadeTime)
+	log.Debugf("SetColorZones(%v, %v, %v, %v..%v, %v)", color.Hue, color.Saturation, color.Brightness, start, end, fadeTime)
 	c.client.SetColorZones(color, start, end, fadeTime)
 }
 

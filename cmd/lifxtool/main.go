@@ -3,18 +3,19 @@ package main
 import (
 	"flag"
 	"fmt"
-	"math"
 	"time"
 
 	"github.com/dorkowscy/lifxtool/pkg/canvas"
 	"github.com/dorkowscy/lifxtool/pkg/effects"
 	"github.com/dorkowscy/lyslix/lifx"
 	"github.com/lucasb-eyer/go-colorful"
+	log "github.com/sirupsen/logrus"
 )
 
-const rad = math.Pi / 180
-
 func main() {
+	var cv canvas.Canvas
+
+	debug := flag.Bool("debug", false, "turn on debug messages")
 	host := flag.String("host", "", "lifx bulb hostname or ip address")
 	port := flag.Uint("port", 56700, "lifx bulb port")
 	size := flag.Uint("size", 0, "lifx canvas size")
@@ -24,6 +25,15 @@ func main() {
 	framerate := time.Second / time.Duration(*fps)
 	_ = size
 
+	log.SetFormatter(&log.TextFormatter{
+		FullTimestamp:   true,
+		TimestampFormat: time.RFC3339Nano,
+		DisableSorting:  true,
+	})
+	if *debug {
+		log.SetLevel(log.DebugLevel)
+	}
+
 	addr := fmt.Sprintf("%s:%d", *host, *port)
 	client, err := lifx.NewClient(addr)
 	if err != nil {
@@ -32,15 +42,19 @@ func main() {
 
 	defer client.Close()
 
-	cv := canvas.NewStrip(client, int(*size))
+	if *size == 0 {
+		cv = canvas.NewLight(client)
+	} else {
+		cv = canvas.NewStrip(client, int(*size))
+	}
 	base := colorful.Hcl(0, 0.25, 0.25)
-	base=colorful.Color{}
+	base = colorful.Color{}
 	cv.Fill(base)
 	cv.Draw(0)
 
 	pixels := cv.Pixels()
 
-	eff := &effects.NorthernLights{
+	_ = &effects.NorthernLights{
 		Threshold: 0.02,
 		Cutoff:    0.3,
 		Base:      base,
@@ -49,11 +63,14 @@ func main() {
 		Fade:      0.2,
 	}
 
+	eff := &effects.ColorWheel{
+		Colors: effects.HCLCircle(0, 0.3, 0.8, 400),
+	}
+
 	for {
 		eff.Draw(pixels)
 		cv.Set(pixels)
 		cv.Draw(framerate)
 		time.Sleep(framerate)
-		fmt.Println()
 	}
 }
