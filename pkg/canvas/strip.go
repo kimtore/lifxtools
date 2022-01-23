@@ -1,13 +1,14 @@
 package canvas
 
 import (
-	"fmt"
 	"time"
 
 	"github.com/dorkowscy/lyslix/lifx"
 	"github.com/lucasb-eyer/go-colorful"
+	log "github.com/sirupsen/logrus"
 )
 
+// LIFX Z strip, without extended multizone support.
 type strip struct {
 	client lifx.Client
 	size   int
@@ -27,7 +28,7 @@ func NewStrip(client lifx.Client, size int) Canvas {
 }
 
 func (c *strip) setColorZones(color lifx.HBSK, start, end uint8, fadeTime time.Duration) {
-	fmt.Printf("SetColorZones(%v, %v, %v, %v..%v, %v)\n", color.Hue, color.Saturation, color.Brightness, start, end, fadeTime)
+	log.Debugf("SetColorZones(%v, %v, %v, %v..%v, %v)\n", color.Hue, color.Saturation, color.Brightness, start, end, fadeTime)
 	c.client.SetColorZones(color, start, end, fadeTime)
 }
 
@@ -37,11 +38,15 @@ func (c *strip) Fill(color colorful.Color) {
 	}
 }
 
+// Recursively look for identical or unchanged pixels in order to reduce packet count.
+// We eliminate some packets by grouping together color zones that should have the same color.
 func (c *strip) drawRange(start, i int, fadeTime time.Duration) int {
 	if i >= c.size {
 		c.setColorZones(c.hbsk[start], uint8(start), uint8(c.size-1), fadeTime)
 		return i
 	}
+	// This canvas has a framebuffer which is aware of the colors on the strip,
+	// and does not re-send colors that hasn't changed since the last call.
 	if c.hbsk[i] == c.cached[i] {
 		if start != i {
 			c.setColorZones(c.hbsk[start], uint8(start), uint8(i-1), fadeTime)
@@ -59,39 +64,11 @@ func (c *strip) drawRange(start, i int, fadeTime time.Duration) int {
 func (c *strip) Draw(fadeTime time.Duration) {
 	var i int
 	for i = range c.pixels {
-		c.hbsk[i] = ToHBSK(c.pixels[i])
+		c.hbsk[i] = HBSK(c.pixels[i])
 	}
 	for i = 0; i < c.size; {
 		i = c.drawRange(i, i, fadeTime)
 	}
-	/*
-		for i := range c.pixels {
-			if c.hbsk[i] == c.cached[i] {
-				continue
-			}
-			if start < 0 {
-				start = i
-			}
-			c.cached[i] = c.hbsk[i]
-			if c.hbsk[i] == c.hbsk[i+1] {
-				continue
-			}
-			c.client.SetColorZones(c.hbsk[i], uint8(start), uint8(i), fadeTime)
-			fmt.Printf("SetColorZones(%v, %v, %v, %v..%v, %v)\n", c.hbsk[i].Hue, c.hbsk[i].Saturation, c.hbsk[i].Brightness, uint8(start), uint8(i), fadeTime)
-			start=-1
-		}
-		/*
-			for i, pixel := range c.pixels {
-				hbsk := ToHBSK(pixel)
-				if c.hbsk[i] == hbsk {
-					continue
-				}
-				c.hbsk[i] = hbsk
-				c.client.SetColorZones(hbsk, uint8(i), uint8(i), fadeTime)
-				//fmt.Printf("SetColorZones(%#v, %v..%v, %v)\n", hbsk, uint8(i), uint8(i), fadeTime)
-			}
-
-	*/
 }
 
 func (c *strip) Set(pixels []colorful.Color) {

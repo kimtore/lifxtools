@@ -57,30 +57,3 @@ func main() {
 		fmt.Println()
 	}
 }
-
-func circle(cv canvas.Canvas, chroma, lum float64, interval time.Duration) {
-	fmt.Printf("L*,C*,h*,H,S,V\n")
-	for hue := 0.0; hue < 360; hue++ {
-		/*
-			rads := deg * rad
-			x := math.Sin(rads)
-			y := math.Cos(rads)
-			colorful.Hcl()
-			color := colorful.Lab(lum, x, y)
-
-		*/
-		color := colorful.Hcl(hue, chroma, lum)
-		clamped := color.Clamped()
-		h, s, v := color.Hsv()
-		fmt.Printf("%.5f,%.5f,%.5f,%.5f,%.5f,%.5f", lum, chroma, hue, h, s, v)
-		if clamped != color {
-			fmt.Printf(" [out of gamut]")
-		}
-		fmt.Printf("\n")
-		//fmt.Printf("%.5f,%.5f,%.5f,%.5f,%.5f,%.5f,%.5f\n", deg, rads, x, y, h, s, v)
-		//log.Printf("(%.5f, %.5f) = (%.5f, %.5f, %.5f)", x, y, h, s, v)
-		cv.Fill(color)
-		cv.Draw(interval)
-		time.Sleep(interval)
-	}
-}

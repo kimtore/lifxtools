@@ -14,13 +14,14 @@ type Canvas interface {
 	Pixels() []colorful.Color
 }
 
-func ToHBSK(color colorful.Color) lifx.HBSK {
-	const max = float64(65535)
+// Convert a colorful.Color into LIFX's representation of color.
+func HBSK(color colorful.Color) lifx.HBSK {
+	const full = float64(65535)
 	h, s, v := color.Clamped().Hsv()
 	return lifx.HBSK{
-		Hue:        uint16((h / 360) * max),
-		Saturation: uint16(s * max),
-		Brightness: uint16(v * max),
+		Hue:        uint16((h / 360) * full),
+		Saturation: uint16(s * full),
+		Brightness: uint16(v * full),
 		Kelvin:     uint16(6500),
 	}
 }
