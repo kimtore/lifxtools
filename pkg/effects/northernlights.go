@@ -18,13 +18,13 @@ type NorthernLights struct {
 func (e *NorthernLights) Draw(pixels []colorful.Color) {
 	for i := range pixels {
 		if e.Threshold < rand.Float64() {
-			if pixels[i].DistanceLuv(e.Base) > e.Cutoff {
-				pixels[i] = pixels[i].BlendLuv(e.Base, e.Fade)
+			if pixels[i].DistanceLab(e.Base) > e.Cutoff {
+				pixels[i] = pixels[i].BlendHcl(e.Base, e.Fade)
 			} else {
 				pixels[i] = e.Base
 			}
 		} else {
-			pixels[i] = e.Color1.BlendLuv(e.Color2, rand.Float64())
+			pixels[i] = e.Color1.BlendHcl(e.Color2, rand.Float64())
 		}
 	}
 }
