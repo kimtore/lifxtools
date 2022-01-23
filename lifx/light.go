@@ -24,6 +24,14 @@ type HBSK struct {
 	Kelvin     uint16
 }
 
+const (
+	MaxHue         uint16 = 65535
+	FullSaturation uint16 = 65535
+	FullBrightness uint16 = 65535
+	Warm           uint16 = 2500
+	Cool           uint16 = 9000
+)
+
 // Sent by a client to change the light state.
 //
 // The duration is the color transition time in milliseconds.
