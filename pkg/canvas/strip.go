@@ -12,15 +12,20 @@ import (
 type strip struct {
 	client lifx.Client
 	size   int
+	min    uint8
+	max    uint8
 	pixels []colorful.Color
 	hbsk   []lifx.HBSK
 	cached []lifx.HBSK
 }
 
-func NewStrip(client lifx.Client, size int) Canvas {
+func NewStrip(client lifx.Client, min, max uint8) Canvas {
+	size := int(max - min + 1)
 	return &strip{
 		client: client,
 		size:   size,
+		min:    min,
+		max:    max,
 		pixels: make([]colorful.Color, size),
 		hbsk:   make([]lifx.HBSK, size+1),
 		cached: make([]lifx.HBSK, size),
@@ -28,6 +33,8 @@ func NewStrip(client lifx.Client, size int) Canvas {
 }
 
 func (c *strip) setColorZones(color lifx.HBSK, start, end uint8, fadeTime time.Duration) {
+	start += c.min
+	end += c.min
 	log.Debugf("SetColorZones(%v, %v, %v, %v..%v, %v)", color.Hue, color.Saturation, color.Brightness, start, end, fadeTime)
 	c.client.SetColorZones(color, start, end, fadeTime)
 }
@@ -78,6 +85,6 @@ func (c *strip) Set(pixels []colorful.Color) {
 	copy(c.pixels, pixels)
 }
 
-func (c *strip) Pixels() []colorful.Color {
-	return make([]colorful.Color, c.size)
+func (c *strip) Size() int {
+	return c.size
 }

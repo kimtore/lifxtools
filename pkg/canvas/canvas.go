@@ -11,7 +11,7 @@ type Canvas interface {
 	Fill(color colorful.Color)
 	Draw(fadeTime time.Duration)
 	Set(pixels []colorful.Color)
-	Pixels() []colorful.Color
+	Size() int
 }
 
 // Convert a colorful.Color into LIFX's representation of color.

@@ -21,13 +21,14 @@ func HCLCircle(hue, chroma, luminance float64, steps int) []colorful.Color {
 
 // Cycles through a list of colors indefinitely.
 type ColorWheel struct {
-	Colors []colorful.Color
-	index  int
+	Hue       float64
+	Chroma    float64
+	Luminance float64
+	Increment float64
 }
 
 func (e *ColorWheel) Draw(pixels []colorful.Color) {
-	for i := range pixels {
-		pixels[i] = e.Colors[e.index]
-	}
-	e.index = (e.index + 1) % len(e.Colors)
+	wheel := HCLCircle(e.Hue, e.Chroma, e.Luminance, len(pixels))
+	copy(pixels, wheel)
+	e.Hue += e.Increment
 }

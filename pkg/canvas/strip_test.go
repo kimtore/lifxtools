@@ -12,6 +12,8 @@ import (
 // Tests for color zone optimizations.
 
 const size = 10
+const min = 0
+const max = 9
 const fadetime = time.Duration(0)
 
 // Test that pixels don't get sent the same value twice.
@@ -20,7 +22,7 @@ func TestStrip_DrawBlankCached(t *testing.T) {
 	cli := &mocks.Client{}
 	cli.On("SetColorZones", hbsk, uint8(0), uint8(9), fadetime).Return(nil).Once()
 
-	cv := canvas.NewStrip(cli, size)
+	cv := canvas.NewStrip(cli, min, max)
 	cv.Draw(fadetime)
 
 	// extra draws should be ignored by cache
@@ -41,8 +43,8 @@ func TestStrip_DrawContiguousZone(t *testing.T) {
 	cli.On("SetColorZones", canvas.HBSK(color), uint8(4), uint8(8), fadetime).Return(nil).Once()
 	cli.On("SetColorZones", canvas.HBSK(black), uint8(9), uint8(9), fadetime).Return(nil).Once()
 
-	cv := canvas.NewStrip(cli, size)
-	pixels := cv.Pixels()
+	cv := canvas.NewStrip(cli, min, max)
+	pixels := make([]colorful.Color, cv.Size())
 
 	for i := 4; i <= 8; i++ {
 		pixels[i] = color
@@ -72,8 +74,8 @@ func TestStrip_DrawTwoZones(t *testing.T) {
 	cli.On("SetColorZones", canvas.HBSK(color), uint8(7), uint8(7), fadetime).Return(nil).Once()
 	cli.On("SetColorZones", canvas.HBSK(black), uint8(8), uint8(9), fadetime).Return(nil).Once()
 
-	cv := canvas.NewStrip(cli, size)
-	pixels := cv.Pixels()
+	cv := canvas.NewStrip(cli, min, max)
+	pixels := make([]colorful.Color, cv.Size())
 
 	pixels[4] = color
 	pixels[7] = color

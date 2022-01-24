@@ -11,6 +11,7 @@ import (
 type light struct {
 	client lifx.Client
 	color  colorful.Color
+	last   lifx.HBSK
 }
 
 func NewLight(client lifx.Client) Canvas {
@@ -25,6 +26,10 @@ func (c *light) Fill(color colorful.Color) {
 
 func (c *light) Draw(fadeTime time.Duration) {
 	hbsk := HBSK(c.color)
+	if hbsk == c.last {
+		return
+	}
+	c.last = hbsk
 	log.Debugf("SetColor(hue=%v, sat=%v, bri=%v, fade=%v)", hbsk.Hue, hbsk.Saturation, hbsk.Brightness, fadeTime)
 	c.client.SetColor(hbsk, fadeTime)
 }
@@ -37,6 +42,6 @@ func (c *light) Set(color []colorful.Color) {
 	}
 }
 
-func (c *light) Pixels() []colorful.Color {
-	return make([]colorful.Color, 1)
+func (c *light) Size() int {
+	return 1
 }
