@@ -4,6 +4,7 @@ import (
 	"context"
 	"flag"
 	"fmt"
+	"net/http"
 	"os"
 	"os/signal"
 	"time"
@@ -11,6 +12,7 @@ import (
 	"github.com/dorkowscy/lifxtool/pkg/canvas"
 	"github.com/dorkowscy/lifxtool/pkg/config"
 	"github.com/dorkowscy/lifxtool/pkg/effects"
+	"github.com/dorkowscy/lifxtool/pkg/server"
 	"github.com/dorkowscy/lyslix/lifx"
 	log "github.com/sirupsen/logrus"
 	"gopkg.in/yaml.v2"
@@ -26,6 +28,8 @@ func main() {
 func run() error {
 	configFileName := flag.String("config", "config.yaml", "path to configuration file")
 	presetName := flag.String("preset", "", "preset effect and canvas combination to run")
+	bindAddress := flag.String("bind", "127.0.0.1:7178", "HOST:PORT combination for setting up an HTTP server")
+
 	flag.Parse()
 
 	cfg, err := readConfig(*configFileName)
@@ -42,6 +46,8 @@ func run() error {
 	if cfg.Options.Debug {
 		log.SetLevel(log.DebugLevel)
 	}
+
+	log.Infof("LIFXTOOL starting up")
 
 	log.Infof("Initializing bulbs...")
 	bulbs, err := bulbClients(cfg.Bulbs)
@@ -60,11 +66,27 @@ func run() error {
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
 
-	mgr := effects.NewManager(ctx, presets, canvases, bulbs, nil)
+	mgr := effects.NewManager(ctx, presets, canvases, bulbs)
+	srv := server.New(mgr)
 
-	err = mgr.StartPreset(*presetName)
-	if err != nil {
-		return err
+	// Start one-off with preset if requested on command line.
+	if len(*presetName) > 0 {
+		err = mgr.StartPreset(*presetName)
+		if err != nil {
+			return err
+		}
+	}
+
+	// Start a HTTP server that controls the effects.
+	if len(*bindAddress) > 0 {
+		go func() {
+			log.Infof("Starting HTTP server on %s...", *bindAddress)
+			err := http.ListenAndServe(*bindAddress, srv.Router())
+			if err != nil {
+				log.Errorf("HTTP server shut down with error: %s", err)
+			}
+			cancel()
+		}()
 	}
 
 	sigs := make(chan os.Signal, 1)
