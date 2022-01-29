@@ -21,22 +21,58 @@ func (c *Color) UnmarshalJSON(bytes []byte) error {
 	if err != nil {
 		return err
 	}
-	c.Color, err = ParseHCL(input)
+	color, err := ParseRGB(input)
+	if err != nil {
+		color, err = ParseHCL(input)
+	}
+	if err == nil {
+		c.Color = color
+		return nil
+	}
 	return err
 }
 
-func ParseHCL(input string) (colorful.Color, error) {
-	s := strings.TrimLeft(input, "hcl(")
-	s = strings.TrimRight(s, ")")
-	parts := strings.Split(s, ",")
+func (c *Color) MarshalJSON() ([]byte, error) {
+	r, g, b := c.Clamped().RGB255()
+	s := fmt.Sprintf(`"%d,%d,%d"`, r, g, b)
+	return []byte(s), nil
+}
 
-	if len(parts) != 3 {
+func ParseRGB(input string) (colorful.Color, error) {
+	floats, err := stringFloats(input, 3)
+	if err != nil {
+		return colorful.Color{}, err
+	}
+	return colorful.LinearRgb(floats[0]/256.0, floats[1]/256.0, floats[2]/256.0), nil
+}
+
+func ParseHCL(input string) (colorful.Color, error) {
+	if !strings.HasPrefix(input, "hcl(") || !strings.HasSuffix(input, ")") {
 		return colorful.Color{}, fmt.Errorf("invalid format: '%s'; expected 'hcl(hue, chroma, luminance)'", input)
 	}
+	input = strings.TrimLeft(input, "hcl(")
+	input = strings.TrimRight(input, ")")
 
-	hue, _ := strconv.ParseFloat(strings.TrimSpace(parts[0]), 64)
-	chroma, _ := strconv.ParseFloat(strings.TrimSpace(parts[1]), 64)
-	luminance, _ := strconv.ParseFloat(strings.TrimSpace(parts[2]), 64)
+	floats, err := stringFloats(input, 3)
+	if err != nil {
+		return colorful.Color{}, err
+	}
 
-	return colorful.Hcl(hue, chroma, luminance), nil
+	return colorful.Hcl(floats[0], floats[1], floats[2]), nil
+}
+
+func stringFloats(input string, num int) ([]float64, error) {
+	floats := make([]float64, 0)
+	parts := strings.Split(input, ",")
+	if len(parts) != num {
+		return nil, fmt.Errorf("string contains %d numbers; expected %d", len(parts), num)
+	}
+	for _, s := range parts {
+		f, err := strconv.ParseFloat(strings.TrimSpace(s), 64)
+		if err != nil {
+			return nil, err
+		}
+		floats = append(floats, f)
+	}
+	return floats, nil
 }

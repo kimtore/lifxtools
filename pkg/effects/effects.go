@@ -23,7 +23,7 @@ type Manager interface {
 	StopPreset(preset string) error
 	IsActive(preset string) bool
 	Configuration(preset string) map[string]interface{}
-	Configure(preset string, values map[string]interface{})
+	Configure(preset string, values map[string]interface{}) error
 }
 
 type manager struct {
@@ -148,9 +148,9 @@ func (r *manager) Configuration(preset string) map[string]interface{} {
 	return values
 }
 
-func (r *manager) Configure(preset string, values map[string]interface{}) {
+func (r *manager) Configure(preset string, values map[string]interface{}) error {
 	buf := &bytes.Buffer{}
 	json.NewEncoder(buf).Encode(values)
 	run := r.runners[preset]
-	json.NewDecoder(buf).Decode(run.effect)
+	return json.NewDecoder(buf).Decode(run.effect)
 }

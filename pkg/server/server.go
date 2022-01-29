@@ -100,7 +100,13 @@ func (s *httpserver) Configure(w http.ResponseWriter, r *http.Request) {
 		option: value,
 	}
 
-	s.manager.Configure(preset, cfg)
+	err = s.manager.Configure(preset, cfg)
+	if err != nil {
+		log.Errorf("Configuration failed: %s", err)
+		http.Error(w, err.Error(), http.StatusBadRequest)
+	}
+
+	log.Debugf("cfg=%v", s.manager.Configuration(preset))
 }
 
 func unmarshal(value string) interface{} {
