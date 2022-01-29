@@ -1,31 +1,36 @@
 package main
 
 import (
-	"encoding/json"
+	"context"
 	"flag"
 	"fmt"
 	"os"
+	"os/signal"
 	"time"
 
 	"github.com/dorkowscy/lifxtool/pkg/canvas"
 	"github.com/dorkowscy/lifxtool/pkg/config"
 	"github.com/dorkowscy/lifxtool/pkg/effects"
 	"github.com/dorkowscy/lyslix/lifx"
-	"github.com/lucasb-eyer/go-colorful"
 	log "github.com/sirupsen/logrus"
 	"gopkg.in/yaml.v2"
 )
 
 func main() {
-	var eff effects.Effect
+	err := run()
+	if err != nil {
+		log.Errorf("fatal: %s", err)
+	}
+}
 
+func run() error {
 	configFileName := flag.String("config", "config.yaml", "path to configuration file")
 	presetName := flag.String("preset", "", "preset effect and canvas combination to run")
 	flag.Parse()
 
 	cfg, err := readConfig(*configFileName)
 	if err != nil {
-		panic(err)
+		return err
 	}
 
 	log.SetFormatter(&log.TextFormatter{
@@ -41,76 +46,46 @@ func main() {
 	log.Infof("Initializing bulbs...")
 	bulbs, err := bulbClients(cfg.Bulbs)
 	if err != nil {
-		panic(err)
+		return err
 	}
 
 	log.Infof("Initializing canvases...")
 	canvases, err := buildCanvases(cfg.Canvases, bulbs)
 	if err != nil {
-		panic(err)
+		return err
 	}
 
-	log.Infof("Initializing presets...")
-	preset, err := lookupPreset(cfg.Presets, *presetName)
+	presets := mapPresets(cfg.Presets)
+
+	ctx, cancel := context.WithCancel(context.Background())
+	defer cancel()
+
+	mgr := effects.NewManager(ctx, presets, canvases, bulbs, nil)
+
+	err = mgr.StartPreset(*presetName)
 	if err != nil {
-		panic(err)
+		return err
 	}
 
-	log.Infof("Using preset '%s'", preset.Name)
-	cv := canvases[preset.Canvas]
-	if cv == nil {
-		err = fmt.Errorf("preset '%s' uses undefined canvas '%s'", preset.Name, preset.Canvas)
-		panic(err)
-	}
-
-	log.Infof("Initializing effect '%s' on canvas '%s'", preset.Effect.Name, preset.Canvas)
-	eff, err = makeEffect(preset.Effect)
-	if err != nil {
-		panic(err)
-	}
-
-	pixels := make([]colorful.Color, cv.Size())
-
-	log.Debugf("Canvas contains a total of %d separate light points", len(pixels))
+	sigs := make(chan os.Signal, 1)
+	signal.Notify(sigs, os.Interrupt)
 
 	for {
-		log.Debugf("Tick()")
-		eff.Draw(pixels)
-		cv.Set(pixels)
-		cv.Draw(preset.Delay)
-		time.Sleep(preset.Delay)
-	}
-
-}
-
-func lookupPreset(presets []config.Preset, name string) (*config.Preset, error) {
-	for _, preset := range presets {
-		if preset.Name == name {
-			return &preset, nil
+		select {
+		case <-ctx.Done():
+			return nil
+		case <-sigs:
+			return nil
 		}
 	}
-	return nil, fmt.Errorf("preset with name '%s' not found", name)
 }
 
-func makeEffect(cfg config.Effect) (effects.Effect, error) {
-	var eff effects.Effect
-	switch cfg.Name {
-	case "colorwheel":
-		eff = &effects.ColorWheel{}
-	case "northernlights":
-		eff = &effects.NorthernLights{}
-	default:
-		return nil, fmt.Errorf("effect '%s' does not exist", cfg.Name)
+func mapPresets(presets []config.Preset) map[string]config.Preset {
+	mp := make(map[string]config.Preset)
+	for _, preset := range presets {
+		mp[preset.Name] = preset
 	}
-	cf, err := json.Marshal(cfg.Config)
-	if err != nil {
-		return nil, err
-	}
-	err = json.Unmarshal(cf, eff)
-	if err != nil {
-		return nil, err
-	}
-	return eff, nil
+	return mp
 }
 
 func buildCanvases(cvs []config.Canvas, bulbs map[string]lifx.Client) (map[string]canvas.Canvas, error) {

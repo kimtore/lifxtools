@@ -7,7 +7,7 @@ import (
 )
 
 // Generate an uniform set of colors across all hues using the HCL color space.
-func HCLCircle(hue, chroma, luminance float64, steps int) []colorful.Color {
+func hclCircle(hue, chroma, luminance float64, steps int) []colorful.Color {
 	const circle = 360.0
 	colors := make([]colorful.Color, 0, steps)
 	incr := circle / float64(steps)
@@ -28,7 +28,7 @@ type ColorWheel struct {
 }
 
 func (e *ColorWheel) Draw(pixels []colorful.Color) {
-	wheel := HCLCircle(e.Hue, e.Chroma, e.Luminance, len(pixels))
+	wheel := hclCircle(e.Hue, e.Chroma, e.Luminance, len(pixels))
 	copy(pixels, wheel)
 	e.Hue += e.Increment
 }
