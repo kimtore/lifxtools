@@ -22,6 +22,10 @@ func (r *runner) Run() {
 	log.Infof("[%s] Runner started", r.name)
 
 	pixels := make([]colorful.Color, r.canvas.Size())
+	r.effect.Init(pixels)
+	r.canvas.Set(pixels)
+	r.canvas.Draw(0)
+
 	for {
 		select {
 		case <-r.ctx.Done():

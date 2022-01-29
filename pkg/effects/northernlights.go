@@ -16,6 +16,12 @@ type NorthernLights struct {
 	Color     Color   `json:"color"`
 }
 
+func (e *NorthernLights) Init(pixels []colorful.Color) {
+	for i := range pixels {
+		pixels[i] = e.Color.Color
+	}
+}
+
 func (e *NorthernLights) Draw(pixels []colorful.Color) {
 	for i := range pixels {
 		if e.Intensity < rand.Float64() {

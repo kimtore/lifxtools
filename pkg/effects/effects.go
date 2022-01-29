@@ -15,6 +15,7 @@ import (
 )
 
 type Effect interface {
+	Init(pixels []colorful.Color)
 	Draw(pixels []colorful.Color)
 }
 

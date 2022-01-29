@@ -27,6 +27,10 @@ type ColorWheel struct {
 	Increment float64 `json:"increment"`
 }
 
+func (e *ColorWheel) Init(pixels []colorful.Color) {
+	e.Draw(pixels)
+}
+
 func (e *ColorWheel) Draw(pixels []colorful.Color) {
 	wheel := hclCircle(e.Hue, e.Chroma, e.Luminance, len(pixels))
 	copy(pixels, wheel)
