@@ -16,10 +16,12 @@ type NorthernLights struct {
 	Color     Color   `json:"color"`
 }
 
+func init() {
+	register("northernlights", &NorthernLights{})
+}
+
 func (e *NorthernLights) Init(pixels []colorful.Color) {
-	for i := range pixels {
-		pixels[i] = e.Color.Color
-	}
+	fill(pixels, e.Color.Color)
 }
 
 func (e *NorthernLights) Draw(pixels []colorful.Color) {

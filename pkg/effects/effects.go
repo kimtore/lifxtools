@@ -13,6 +13,18 @@ type Effect interface {
 	Draw(pixels []colorful.Color)
 }
 
+var library = map[string]Effect{}
+
+func register(name string, effect Effect) {
+	library[name] = effect
+}
+
+func fill(pixels []colorful.Color, color colorful.Color) {
+	for i := range pixels {
+		pixels[i] = color
+	}
+}
+
 func NewFromConfig(cfg config.Effect) (Effect, error) {
 	var eff Effect
 	switch cfg.Name {
@@ -20,6 +32,8 @@ func NewFromConfig(cfg config.Effect) (Effect, error) {
 		eff = &ColorWheel{}
 	case "northernlights":
 		eff = &NorthernLights{}
+	case "sine":
+		eff = &Sine{}
 	default:
 		return nil, fmt.Errorf("effect '%s' is not implemented", cfg.Name)
 	}
