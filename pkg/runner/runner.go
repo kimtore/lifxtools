@@ -23,7 +23,7 @@ type runner struct {
 }
 
 func (r *runner) Run() {
-	log.Infof("[%s] Runner started", r.name)
+	log.Warnf("[%s] STARTED", r.name)
 
 	pixels := make([]colorful.Color, r.canvas.Size())
 	r.effect.Init(pixels)
@@ -33,10 +33,10 @@ func (r *runner) Run() {
 	for {
 		select {
 		case <-r.ctx.Done():
-			log.Infof("[%s] Runner stopped", r.name)
+			log.Warnf("[%s] STOPPED", r.name)
 			return
 		case <-time.After(r.delay):
-			log.Debugf("[%s] Rendering: %#v", r.name, r.effect)
+			log.Debugf("[%s] RENDER %#v", r.name, r.effect)
 			r.effect.Draw(pixels)
 			r.canvas.Set(pixels)
 			r.canvas.Draw(r.delay)
@@ -45,8 +45,7 @@ func (r *runner) Run() {
 }
 
 var (
-	ErrPresetNotFound   = errors.New("preset not found")
-	ErrPresetNotRunning = errors.New("preset not running")
+	ErrPresetNotFound = errors.New("preset not found")
 )
 
 func (r *manager) IsActive(preset string) bool {

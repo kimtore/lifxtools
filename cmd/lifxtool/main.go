@@ -49,19 +49,20 @@ func run() error {
 
 	log.Infof("LIFXTOOL starting up")
 
-	log.Infof("Initializing bulbs...")
-	bulbs, err := bulbClients(cfg.Bulbs)
+	bulbs, err := initBulbs(cfg.Bulbs)
 	if err != nil {
-		return err
+		return fmt.Errorf("initializing bulbs: %w", err)
 	}
+	log.Infof("Loaded %d LIFX bulbs/strips", len(bulbs))
 
-	log.Infof("Initializing canvases...")
-	canvases, err := buildCanvases(cfg.Canvases, bulbs)
+	canvases, err := initCanvases(cfg.Canvases, bulbs)
 	if err != nil {
-		return err
+		return fmt.Errorf("initializing canvases: %w", err)
 	}
+	log.Infof("Loaded %d canvases", len(canvases))
 
 	presets := mapPresets(cfg.Presets)
+	log.Infof("Loaded %d presets", len(presets))
 
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
@@ -80,7 +81,7 @@ func run() error {
 	// Start a HTTP server that controls the effects.
 	if len(*bindAddress) > 0 {
 		go func() {
-			log.Infof("Starting HTTP server on %s...", *bindAddress)
+			log.Infof("HTTP server listening on %s", *bindAddress)
 			err := http.ListenAndServe(*bindAddress, srv.Router())
 			if err != nil {
 				log.Errorf("HTTP server shut down with error: %s", err)
@@ -92,12 +93,16 @@ func run() error {
 	sigs := make(chan os.Signal, 1)
 	signal.Notify(sigs, os.Interrupt)
 
+	log.Infof("Setup complete; LIFXTOOL is ready")
+
 	for {
 		select {
 		case <-ctx.Done():
+			log.Infof("LIFXTOOL shutting down.")
 			return nil
-		case <-sigs:
-			return nil
+		case s := <-sigs:
+			log.Infof("Received %s", s.String())
+			cancel()
 		}
 	}
 }
@@ -110,7 +115,7 @@ func mapPresets(presets []config.Preset) map[string]config.Preset {
 	return mp
 }
 
-func buildCanvases(cvs []config.Canvas, bulbs map[string]lifx.Client) (map[string]canvas.Canvas, error) {
+func initCanvases(cvs []config.Canvas, bulbs map[string]lifx.Client) (map[string]canvas.Canvas, error) {
 	var err error
 	canvases := make(map[string]canvas.Canvas)
 	for i, cv := range cvs {
@@ -143,7 +148,7 @@ func buildCanvas(cv config.Canvas, bulbs map[string]lifx.Client) (canvas.Canvas,
 	return canvas.NewAggregate(seq...), nil
 }
 
-func bulbClients(bulbs []config.Bulb) (map[string]lifx.Client, error) {
+func initBulbs(bulbs []config.Bulb) (map[string]lifx.Client, error) {
 	var err error
 	clients := make(map[string]lifx.Client)
 	for i, bulb := range bulbs {
@@ -167,19 +172,6 @@ func bulbClient(bulb config.Bulb) (lifx.Client, error) {
 	addr := bulb.Host + port
 	return lifx.NewClient(addr)
 }
-
-/*
-	base := colorful.Hcl(0, 0.25, 0.25)
-	base = colorful.Color{}
-	cv.Fill(base)
-	cv.Draw(0)
-
-	pixels := cv.Pixels()
-
-	_ = &effects.NorthernLights{
-	}
-
-*/
 
 func readConfig(filename string) (*config.Config, error) {
 	configFile, err := os.Open(filename)
