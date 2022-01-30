@@ -96,14 +96,14 @@ func (s *httpserver) Configure(w http.ResponseWriter, r *http.Request) {
 	buf := &bytes.Buffer{}
 	_, err := io.Copy(buf, r.Body)
 	if err != nil {
-		log.Errorf("Configure %s.%s: %s", preset, option, err)
+		log.Errorf("Set %s.%s: %s", preset, option, err)
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
 
 	value := unmarshal(buf.String())
 
-	log.Infof("Configure %s.%s = %v (%T)", preset, option, value, value)
+	log.Debugf("Set %T %s.%s=%v", value, preset, option, value)
 
 	cfg := map[string]interface{}{
 		option: value,
