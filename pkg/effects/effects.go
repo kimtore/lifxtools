@@ -13,10 +13,10 @@ type Effect interface {
 	Draw(pixels []colorful.Color)
 }
 
-var library = map[string]Effect{}
+var library = map[string]func() Effect{}
 
-func register(name string, effect Effect) {
-	library[name] = effect
+func register(name string, factory func() Effect) {
+	library[name] = factory
 }
 
 func fill(pixels []colorful.Color, color colorful.Color) {
@@ -27,16 +27,14 @@ func fill(pixels []colorful.Color, color colorful.Color) {
 
 func NewFromConfig(cfg config.Effect) (Effect, error) {
 	var eff Effect
-	switch cfg.Name {
-	case "colorwheel":
-		eff = &ColorWheel{}
-	case "northernlights":
-		eff = &NorthernLights{}
-	case "sine":
-		eff = &Sine{}
-	default:
+
+	factory := library[cfg.Name]
+	if factory == nil {
 		return nil, fmt.Errorf("effect '%s' is not implemented", cfg.Name)
 	}
+
+	eff = factory()
+
 	cf, err := json.Marshal(cfg.Config)
 	if err != nil {
 		return nil, err

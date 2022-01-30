@@ -17,7 +17,7 @@ type NorthernLights struct {
 }
 
 func init() {
-	register("northernlights", &NorthernLights{})
+	register("northernlights", func() Effect { return &NorthernLights{} })
 }
 
 func (e *NorthernLights) Init(pixels []colorful.Color) {

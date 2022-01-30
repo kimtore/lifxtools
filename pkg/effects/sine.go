@@ -20,7 +20,7 @@ type Sine struct {
 const Rad = 360.0 / (math.Pi * 2)
 
 func init() {
-	register("sine", &Sine{})
+	register("sine", func() Effect { return &Sine{} })
 }
 
 func (e *Sine) Init(pixels []colorful.Color) {

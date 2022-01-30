@@ -15,7 +15,7 @@ type ColorWheel struct {
 }
 
 func init() {
-	register("colorwheel", &ColorWheel{})
+	register("colorwheel", func() Effect { return &ColorWheel{} })
 }
 
 func (e *ColorWheel) Init(pixels []colorful.Color) {
@@ -40,4 +40,3 @@ func hclCircle(hue, chroma, luminance float64, steps int) []colorful.Color {
 	}
 	return colors
 }
-
