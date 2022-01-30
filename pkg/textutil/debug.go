@@ -1,11 +1,12 @@
 package textutil
 
 import (
+	"bytes"
 	"fmt"
 	"io"
-	"os"
 
 	"github.com/lucasb-eyer/go-colorful"
+	log "github.com/sirupsen/logrus"
 )
 
 func FprintColorHSV(w io.Writer, color colorful.Color) {
@@ -27,10 +28,13 @@ func FprintColorHCL(w io.Writer, color colorful.Color) {
 }
 
 func PrintColorHCL(color colorful.Color) {
-	FprintColorHCL(os.Stdout, color)
+	buf := &bytes.Buffer{}
+	FprintColorHCL(buf, color)
+	log.Debug(buf.String())
 }
 
 func PrintColorHSV(color colorful.Color) {
-	FprintColorHSV(os.Stdout, color)
+	buf := &bytes.Buffer{}
+	FprintColorHSV(buf, color)
+	log.Debug(buf.String())
 }
-

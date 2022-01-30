@@ -23,7 +23,7 @@ type runner struct {
 }
 
 func (r *runner) Run() {
-	log.Warnf("[%s] STARTED", r.name)
+	log.Warnf("[%s] RUNNING @ %.3f fps", r.name, 1.0/r.delay.Seconds())
 
 	pixels := make([]colorful.Color, r.canvas.Size())
 	r.effect.Init(pixels)

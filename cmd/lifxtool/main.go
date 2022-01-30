@@ -18,6 +18,15 @@ import (
 	"gopkg.in/yaml.v2"
 )
 
+const (
+	EnvBindAddress = "BIND_ADDRESS"
+	EnvConfigFile  = "CONFIG_FILE"
+)
+
+const (
+	shutdownTimeout = 50 * time.Millisecond
+)
+
 func main() {
 	err := run()
 	if err != nil {
@@ -26,9 +35,9 @@ func main() {
 }
 
 func run() error {
-	configFileName := flag.String("config", "config.yaml", "path to configuration file")
+	bindAddress := flag.String("bind", getEnvDefault(EnvBindAddress, "127.0.0.1:7178"), "HOST:PORT combination for setting up an HTTP server")
+	configFileName := flag.String("config", getEnvDefault(EnvConfigFile, "config.yaml"), "path to configuration file")
 	presetName := flag.String("preset", "", "preset effect and canvas combination to run")
-	bindAddress := flag.String("bind", "127.0.0.1:7178", "HOST:PORT combination for setting up an HTTP server")
 
 	flag.Parse()
 
@@ -99,6 +108,7 @@ func run() error {
 		select {
 		case <-ctx.Done():
 			log.Infof("LIFXTOOL shutting down.")
+			time.Sleep(shutdownTimeout)
 			return nil
 		case s := <-sigs:
 			log.Infof("Received %s", s.String())
@@ -188,4 +198,12 @@ func readConfig(filename string) (*config.Config, error) {
 	}
 
 	return cfg, nil
+}
+
+func getEnvDefault(env, fallback string) string {
+	value, found := os.LookupEnv(env)
+	if found {
+		return value
+	}
+	return fallback
 }
