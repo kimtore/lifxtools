@@ -9,7 +9,7 @@ import (
 	"strconv"
 	"time"
 
-	"github.com/dorkowscy/lifxtool/pkg/effects"
+	"github.com/dorkowscy/lifxtool/pkg/runner"
 	"github.com/go-chi/chi"
 	log "github.com/sirupsen/logrus"
 )
@@ -17,16 +17,17 @@ import (
 // Implements a HTTP server that controls the effect manager
 
 type httpserver struct {
-	manager effects.Manager
+	manager runner.Manager
 }
 
+// Data returned on GET /{preset}
 type effectState struct {
 	Description string                 `json:"description"`
 	Active      bool                   `json:"active"`
 	Config      map[string]interface{} `json:"config"`
 }
 
-func New(manager effects.Manager) *httpserver {
+func New(manager runner.Manager) *httpserver {
 	return &httpserver{
 		manager: manager,
 	}

@@ -11,7 +11,7 @@ import (
 
 	"github.com/dorkowscy/lifxtool/pkg/canvas"
 	"github.com/dorkowscy/lifxtool/pkg/config"
-	"github.com/dorkowscy/lifxtool/pkg/effects"
+	"github.com/dorkowscy/lifxtool/pkg/runner"
 	"github.com/dorkowscy/lifxtool/pkg/server"
 	"github.com/dorkowscy/lyslix/lifx"
 	log "github.com/sirupsen/logrus"
@@ -66,7 +66,7 @@ func run() error {
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
 
-	mgr := effects.NewManager(ctx, presets, canvases, bulbs)
+	mgr := runner.NewManager(ctx, presets, canvases, bulbs)
 	srv := server.New(mgr)
 
 	// Start one-off with preset if requested on command line.

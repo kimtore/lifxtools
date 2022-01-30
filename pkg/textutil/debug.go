@@ -1,4 +1,4 @@
-package effects
+package textutil
 
 import (
 	"fmt"

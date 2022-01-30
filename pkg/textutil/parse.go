@@ -1,42 +1,12 @@
-package effects
+package textutil
 
 import (
-	"encoding/json"
 	"fmt"
 	"strconv"
 	"strings"
 
 	"github.com/lucasb-eyer/go-colorful"
 )
-
-type Color struct {
-	colorful.Color
-}
-
-var _ json.Unmarshaler = &Color{}
-
-func (c *Color) UnmarshalJSON(bytes []byte) error {
-	input := ""
-	err := json.Unmarshal(bytes, &input)
-	if err != nil {
-		return err
-	}
-	color, err := ParseRGB(input)
-	if err != nil {
-		color, err = ParseHCL(input)
-	}
-	if err == nil {
-		c.Color = color
-		return nil
-	}
-	return err
-}
-
-func (c *Color) MarshalJSON() ([]byte, error) {
-	r, g, b := c.Clamped().RGB255()
-	s := fmt.Sprintf(`"%d,%d,%d"`, r, g, b)
-	return []byte(s), nil
-}
 
 func ParseRGB(input string) (colorful.Color, error) {
 	floats, err := stringFloats(input, 3)
