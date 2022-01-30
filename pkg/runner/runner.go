@@ -1,10 +1,7 @@
 package runner
 
 import (
-	"bytes"
 	"context"
-	"encoding/json"
-	"errors"
 	"time"
 
 	"github.com/dorkowscy/lifxtool/pkg/canvas"
@@ -42,59 +39,4 @@ func (r *runner) Run() {
 			r.canvas.Draw(r.delay)
 		}
 	}
-}
-
-var (
-	ErrPresetNotFound = errors.New("preset not found")
-)
-
-func (r *manager) IsActive(preset string) bool {
-	run := r.runners[preset]
-	if run == nil {
-		return false
-	}
-	return run.ctx.Err() == nil
-}
-
-func (r *manager) StartPreset(preset string) error {
-	run, ok := r.runners[preset]
-	if !ok {
-		return ErrPresetNotFound
-	}
-
-	// Stop effect if it's already running
-	_ = r.StopPreset(preset)
-
-	run.ctx, run.cancel = context.WithCancel(r.ctx)
-
-	go run.Run()
-
-	return nil
-}
-
-func (r *manager) StopPreset(preset string) error {
-	run := r.runners[preset]
-	if run == nil {
-		return ErrPresetNotFound
-	}
-	run.cancel()
-	return nil
-}
-
-// Return the active runner's configuration for this preset if available,
-// otherwise return the default configuration for that preset.
-func (r *manager) Configuration(preset string) map[string]interface{} {
-	buf := &bytes.Buffer{}
-	run := r.runners[preset]
-	json.NewEncoder(buf).Encode(run.effect)
-	values := make(map[string]interface{})
-	json.NewDecoder(buf).Decode(&values)
-	return values
-}
-
-func (r *manager) Configure(preset string, values map[string]interface{}) error {
-	buf := &bytes.Buffer{}
-	json.NewEncoder(buf).Encode(values)
-	run := r.runners[preset]
-	return json.NewDecoder(buf).Decode(run.effect)
 }

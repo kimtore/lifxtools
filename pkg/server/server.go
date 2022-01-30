@@ -43,10 +43,18 @@ func (s *httpserver) Router() chi.Router {
 
 func (s *httpserver) Query(w http.ResponseWriter, r *http.Request) {
 	preset := chi.URLParam(r, "preset")
+
+	if !s.manager.Exists(preset) {
+		http.NotFound(w, r)
+		return
+	}
+
 	active := s.manager.IsActive(preset)
 	cfg := s.manager.Configuration(preset)
 
 	log.Debugf("Query(%s): active=%v, cfg=%v", preset, active, cfg)
+
+	w.Header().Set("content-type", "application/json")
 
 	json.NewEncoder(w).Encode(&effectState{
 		Active: active,
