@@ -22,9 +22,10 @@ type Bulb struct {
 }
 
 type Zone struct {
-	Min   *uint8
-	Max   *uint8
-	Limit int
+	Min      *uint8
+	Max      *uint8
+	Limit    int
+	UnitSize uint
 }
 
 type Canvas struct {

@@ -14,7 +14,7 @@ type Canvas interface {
 	Size() int
 }
 
-// Convert a colorful.Color into LIFX's representation of color.
+// HBSK converts colorful.Color into LIFX's representation of color.
 func HBSK(color colorful.Color) lifx.HBSK {
 	const full = float64(65535)
 	h, s, v := color.Clamped().Hsv()

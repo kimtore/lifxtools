@@ -10,25 +10,27 @@ import (
 
 // LIFX Z strip, without extended multizone support.
 type strip struct {
-	client lifx.Client
-	size   int
-	min    uint8
-	max    uint8
-	pixels []colorful.Color
-	hbsk   []lifx.HBSK
-	cached []lifx.HBSK
+	client   lifx.Client
+	size     int
+	min      uint8
+	max      uint8
+	unitSize uint
+	pixels   []colorful.Color
+	hbsk     []lifx.HBSK
+	cached   []lifx.HBSK
 }
 
-func NewStrip(client lifx.Client, min, max uint8) Canvas {
+func NewStrip(client lifx.Client, min, max uint8, unitSize uint) Canvas {
 	size := int(max - min + 1)
 	return &strip{
-		client: client,
-		size:   size,
-		min:    min,
-		max:    max,
-		pixels: make([]colorful.Color, size),
-		hbsk:   make([]lifx.HBSK, size+1),
-		cached: make([]lifx.HBSK, size),
+		client:   client,
+		size:     size,
+		min:      min,
+		max:      max,
+		unitSize: unitSize,
+		pixels:   make([]colorful.Color, size),
+		hbsk:     make([]lifx.HBSK, size+1),
+		cached:   make([]lifx.HBSK, size),
 	}
 }
 
@@ -79,12 +81,26 @@ func (c *strip) Draw(fadeTime time.Duration) {
 }
 
 func (c *strip) Set(pixels []colorful.Color) {
-	if len(pixels) != c.size {
+	sz := c.Size()
+	if len(pixels) != sz {
 		return
 	}
-	copy(c.pixels, pixels)
+	if sz == c.size {
+		// Fast path: copy drawn pixels onto canvas
+		copy(c.pixels, pixels)
+		return
+	}
+
+	for i := range pixels {
+		idx := uint(i) * c.unitSize
+		// Slow path: stretch pixels onto canvas
+		for j := uint(0); j < c.unitSize; j++ {
+			//log.Debugf("Copy pixel pixels[%2d] -> lifx[%2d]", i, idx+j)
+			c.pixels[idx+j] = pixels[i]
+		}
+	}
 }
 
 func (c *strip) Size() int {
-	return c.size
+	return c.size / int(c.unitSize)
 }

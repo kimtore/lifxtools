@@ -7,6 +7,7 @@ import (
 	"github.com/dorkowscy/lifxtool/mocks"
 	"github.com/dorkowscy/lifxtool/pkg/canvas"
 	"github.com/lucasb-eyer/go-colorful"
+	"github.com/stretchr/testify/assert"
 )
 
 // Tests for color zone optimizations.
@@ -22,7 +23,7 @@ func TestStrip_DrawBlankCached(t *testing.T) {
 	cli := &mocks.Client{}
 	cli.On("SetColorZones", hbsk, uint8(0), uint8(9), fadetime).Return(nil).Once()
 
-	cv := canvas.NewStrip(cli, min, max)
+	cv := canvas.NewStrip(cli, min, max, 1)
 	cv.Draw(fadetime)
 
 	// extra draws should be ignored by cache
@@ -43,7 +44,7 @@ func TestStrip_DrawContiguousZone(t *testing.T) {
 	cli.On("SetColorZones", canvas.HBSK(color), uint8(4), uint8(8), fadetime).Return(nil).Once()
 	cli.On("SetColorZones", canvas.HBSK(black), uint8(9), uint8(9), fadetime).Return(nil).Once()
 
-	cv := canvas.NewStrip(cli, min, max)
+	cv := canvas.NewStrip(cli, min, max, 1)
 	pixels := make([]colorful.Color, cv.Size())
 
 	for i := 4; i <= 8; i++ {
@@ -74,11 +75,62 @@ func TestStrip_DrawTwoZones(t *testing.T) {
 	cli.On("SetColorZones", canvas.HBSK(color), uint8(7), uint8(7), fadetime).Return(nil).Once()
 	cli.On("SetColorZones", canvas.HBSK(black), uint8(8), uint8(9), fadetime).Return(nil).Once()
 
-	cv := canvas.NewStrip(cli, min, max)
+	cv := canvas.NewStrip(cli, min, max, 1)
 	pixels := make([]colorful.Color, cv.Size())
 
 	pixels[4] = color
 	pixels[7] = color
+
+	cv.Set(pixels)
+	cv.Draw(fadetime)
+
+	cli.AssertExpectations(t)
+}
+
+// Group zone pixels into virtual pixels
+func TestStrip_DrawVirtualZones(t *testing.T) {
+	black := colorful.Color{}
+	color := colorful.Hcl(180, 0.25, 0.25)
+	cli := &mocks.Client{}
+
+	cli.On("SetColorZones", canvas.HBSK(color), uint8(0), uint8(1), fadetime).Return(nil).Once()
+	cli.On("SetColorZones", canvas.HBSK(black), uint8(2), uint8(13), fadetime).Return(nil).Once()
+	cli.On("SetColorZones", canvas.HBSK(color), uint8(14), uint8(15), fadetime).Return(nil).Once()
+
+	cv := canvas.NewStrip(cli, 0, 15, 2)
+	pixels := make([]colorful.Color, cv.Size())
+
+	assert.Len(t, pixels, 8)
+
+	pixels[0] = color
+	pixels[7] = color
+
+	cv.Set(pixels)
+	cv.Draw(fadetime)
+
+	cli.AssertExpectations(t)
+}
+
+// Group zone pixels into even bigger virtual pixels.
+// The pixels don't line up completely, so the last physical of the strip
+// will be filled with black.
+func TestStrip_DrawBiggerVirtualZones(t *testing.T) {
+	black := colorful.Color{}
+	color := colorful.Hcl(180, 0.25, 0.25)
+	cli := &mocks.Client{}
+
+	cli.On("SetColorZones", canvas.HBSK(color), uint8(0), uint8(4), fadetime).Return(nil).Once()
+	cli.On("SetColorZones", canvas.HBSK(black), uint8(5), uint8(9), fadetime).Return(nil).Once()
+	cli.On("SetColorZones", canvas.HBSK(color), uint8(10), uint8(14), fadetime).Return(nil).Once()
+	cli.On("SetColorZones", canvas.HBSK(black), uint8(15), uint8(15), fadetime).Return(nil).Once()
+
+	cv := canvas.NewStrip(cli, 0, 15, 5)
+	pixels := make([]colorful.Color, cv.Size())
+
+	assert.Len(t, pixels, 3)
+
+	pixels[0] = color
+	pixels[2] = color
 
 	cv.Set(pixels)
 	cv.Draw(fadetime)

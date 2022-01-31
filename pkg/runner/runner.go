@@ -26,13 +26,15 @@ func (r *runner) Run() {
 	r.effect.Init(pixels)
 	r.canvas.Set(pixels)
 	r.canvas.Draw(0)
+	t := time.NewTicker(10 * time.Millisecond)
 
 	for {
 		select {
 		case <-r.ctx.Done():
 			log.Warnf("[%s] STOPPED", r.name)
 			return
-		case <-time.After(r.delay):
+		case <-t.C:
+			t.Reset(r.delay)
 			log.Debugf("[%s] RENDER %#v", r.name, r.effect)
 			r.effect.Draw(pixels)
 			r.canvas.Set(pixels)

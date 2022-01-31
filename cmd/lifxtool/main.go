@@ -146,8 +146,12 @@ func buildCanvas(cv config.Canvas, bulbs map[string]lifx.Client) (canvas.Canvas,
 		if client == nil {
 			return nil, fmt.Errorf("no bulb configured with name '%s'", bulb.Name)
 		}
+		unitSize := bulb.Zone.UnitSize
+		if unitSize == 0 {
+			unitSize = 1
+		}
 		if bulb.Zone.Min != nil && bulb.Zone.Max != nil {
-			seq = append(seq, canvas.NewStrip(client, *bulb.Zone.Min-1, *bulb.Zone.Max-1))
+			seq = append(seq, canvas.NewStrip(client, *bulb.Zone.Min-1, *bulb.Zone.Max-1, unitSize))
 			log.Debugf("Canvas '%s': using zones %d-%d from strip '%s'", cv.Name, *bulb.Zone.Min, *bulb.Zone.Max, bulb.Name)
 		} else {
 			seq = append(seq, canvas.NewLight(client))
