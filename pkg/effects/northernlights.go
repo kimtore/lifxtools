@@ -8,14 +8,15 @@ import (
 	log "github.com/sirupsen/logrus"
 )
 
+// NorthernLights generates "different" pixels (brighter, fuller, or different color)
+// at random on a canvas filled with a base color.
 type NorthernLights struct {
-	Intensity float64 `json:"intensity"` // chance to generate new pixel
-	Fade      float64 `json:"fade"`      // how big percentage to fade out every iteration
-	Cutoff    float64 `json:"cutoff"`    // how small difference is needed to zero out a dying color
-	Diversity float64 `json:"diversity"` // color diversity, in degrees maximum
-	Brighten  float64 `json:"brighten"`  // how much to brighten new dots
-	Saturate  float64 `json:"saturate"`  // how much to saturate new dots
-	Color     Color   `json:"color"`
+	Intensity float64 `json:"intensity"` // percentage chance to generate new pixel, from 0.0 (0%) to 1.0 (100%)
+	Fade      float64 `json:"fade"`      // percentage fadeout bright pixels every iteration
+	Diversity float64 `json:"diversity"` // color hue diversity, in degrees maximum (usable range 0.0-180.0)
+	Brighten  float64 `json:"brighten"`  // how much to brighten new dots, from 0.0 to 1.0.
+	Saturate  float64 `json:"saturate"`  // how much to saturate new dots, from 0.0 to 1.0.
+	Color     Color   `json:"color"`     // base color on the canvas
 	fades     []float64
 	dots      []colorful.Color
 }
@@ -33,6 +34,7 @@ func (e *NorthernLights) Init(pixels []colorful.Color) {
 func (e *NorthernLights) Draw(pixels []colorful.Color) {
 	for i := range pixels {
 		if e.fades[i] > 0 {
+			// Fade out a pixel that was generated earlier
 			pixels[i] = e.Color.BlendHcl(e.dots[i], e.fades[i])
 			e.fades[i] -= e.Fade
 		} else if rand.Float64() < e.Intensity {
@@ -46,26 +48,6 @@ func (e *NorthernLights) Draw(pixels []colorful.Color) {
 			log.Debugf("Generating new pixel at position %d: %s", i, textutil.SprintfHCL(e.dots[i]))
 		} else {
 			pixels[i] = e.Color.Color
-		}
-	}
-}
-func (e *NorthernLights) DrawLegacy(pixels []colorful.Color) {
-	for i := range pixels {
-		if e.Intensity < rand.Float64() {
-			// Fade out existing pixels towards the base color
-			if pixels[i].DistanceLab(e.Color.Color) > e.Cutoff {
-				pixels[i] = pixels[i].BlendHcl(e.Color.Color, e.Fade)
-			} else {
-				pixels[i] = e.Color.Color
-			}
-		} else {
-			// Generate a new pixel within configured range
-			h, c, l := e.Color.Hcl()
-			h += rnd() * e.Diversity
-			c += e.Saturate
-			l += e.Brighten
-			col := colorful.Hcl(h, c, l)
-			pixels[i] = e.Color.BlendHcl(col, rand.Float64())
 		}
 	}
 }
