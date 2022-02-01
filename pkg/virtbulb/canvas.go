@@ -1,10 +1,11 @@
 package virtbulb
 
 import (
+	"fmt"
+
 	"github.com/dorkowscy/lifxtool/pkg/textutil"
 	"github.com/dorkowscy/lyslix/lifx"
 	"github.com/lucasb-eyer/go-colorful"
-	log "github.com/sirupsen/logrus"
 )
 
 type canvas struct {
@@ -40,6 +41,7 @@ func (c *canvas) Draw(from, to int, hbsk lifx.HBSK) {
 }
 
 func (c *canvas) Print() {
+	fmt.Println("---")
 	for i := range c.pixels {
 		color := colorful.Hsv(
 			(float64(c.pixels[i].Hue)/65535.0)*360.0,
@@ -47,6 +49,6 @@ func (c *canvas) Print() {
 			float64(c.pixels[i].Brightness)/65535.0,
 		)
 		s := textutil.SprintfHCL(color)
-		log.Debugf("%2d: %s", i, s)
+		fmt.Printf("%2d: %s\n", i, s)
 	}
 }

@@ -54,7 +54,7 @@ func run() error {
 	stream := virtbulb.NewPacketStreamer(ctx, udp)
 
 	cv := virtbulb.NewCanvas()
-	drawTimer := time.NewTicker(time.Second)
+	drawTimer := time.NewTicker(time.Millisecond * 100)
 
 	log.Infof("Setup complete")
 
