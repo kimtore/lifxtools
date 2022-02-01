@@ -32,7 +32,10 @@ func (e *NorthernLights) Init(pixels []colorful.Color) {
 
 func (e *NorthernLights) Draw(pixels []colorful.Color) {
 	for i := range pixels {
-		if rand.Float64() < e.Intensity {
+		if e.fades[i] > 0 {
+			pixels[i] = e.Color.BlendHcl(e.dots[i], e.fades[i])
+			e.fades[i] -= e.Fade
+		} else if rand.Float64() < e.Intensity {
 			// Generate a new pixel within configured range
 			h, c, l := e.Color.Hcl()
 			h += rnd() * e.Diversity
@@ -41,10 +44,6 @@ func (e *NorthernLights) Draw(pixels []colorful.Color) {
 			e.dots[i] = colorful.Hcl(h, c, l)
 			e.fades[i] = 1
 			log.Debugf("Generating new pixel at position %d: %s", i, textutil.SprintfHCL(e.dots[i]))
-		}
-		if e.fades[i] > 0 {
-			pixels[i] = e.Color.BlendHcl(e.dots[i], e.fades[i])
-			e.fades[i] -= e.Fade
 		} else {
 			pixels[i] = e.Color.Color
 		}
