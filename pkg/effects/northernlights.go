@@ -1,8 +1,6 @@
 package effects
 
 import (
-	"math/rand"
-
 	"github.com/dorkowscy/lifxtool/pkg/textutil"
 	"github.com/lucasb-eyer/go-colorful"
 	log "github.com/sirupsen/logrus"
@@ -37,10 +35,10 @@ func (e *NorthernLights) Draw(pixels []colorful.Color) {
 			// Fade out a pixel that was generated earlier
 			pixels[i] = e.Color.BlendHcl(e.dots[i], e.fades[i])
 			e.fades[i] -= e.Fade
-		} else if rand.Float64() < e.Intensity {
+		} else if randomNonNegative() < e.Intensity {
 			// Generate a new pixel within configured range
 			h, c, l := e.Color.Hcl()
-			h += rnd() * e.Diversity
+			h += random() * e.Diversity
 			c += e.Saturate
 			l += e.Brighten
 			e.dots[i] = colorful.Hcl(h, c, l)
@@ -50,8 +48,4 @@ func (e *NorthernLights) Draw(pixels []colorful.Color) {
 			pixels[i] = e.Color.Color
 		}
 	}
-}
-
-func rnd() float64 {
-	return 1 - rand.Float64() + rand.Float64()
 }
