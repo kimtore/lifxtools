@@ -19,6 +19,10 @@ type runner struct {
 	name   string
 }
 
+const (
+	lifxProcessingTime = time.Millisecond * 10 // approximate latency added to messages
+)
+
 func (r *runner) Run() {
 	log.Warnf("[%s] RUNNING @ %.3f fps", r.name, 1.0/r.delay.Seconds())
 
@@ -38,7 +42,7 @@ func (r *runner) Run() {
 			log.Debugf("[%s] RENDER %#v", r.name, r.effect)
 			r.effect.Draw(pixels)
 			r.canvas.Set(pixels)
-			r.canvas.Draw(r.delay)
+			r.canvas.Draw(r.delay - lifxProcessingTime)
 		}
 	}
 }
