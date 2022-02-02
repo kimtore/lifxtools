@@ -43,6 +43,7 @@ func (e *NorthernLights) Draw(pixels []colorful.Color) {
 			l += e.Brighten
 			e.dots[i] = colorful.Hcl(h, c, l)
 			e.fades[i] = 1
+			pixels[i] = e.dots[i]
 			log.Debugf("Generating new pixel at position %d: %s", i, textutil.SprintfHCL(e.dots[i]))
 		} else {
 			pixels[i] = e.Color.Color
