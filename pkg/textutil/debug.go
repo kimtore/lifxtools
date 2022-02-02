@@ -12,7 +12,7 @@ import (
 func SprintfHCL(color colorful.Color) string {
 	w := &bytes.Buffer{}
 	h, c, l := color.Hcl()
-	fmt.Fprintf(w, "H*=%-9.5f C*=%.5f l*=%.5f", h, c, l)
+	fmt.Fprintf(w, "H*=%-7.2f C*=%-5.2f l*=%-5.2f", h, c, l)
 	if color.Clamped() != color {
 		fmt.Fprintf(w, " [out of gamut]")
 	}

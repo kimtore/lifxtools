@@ -34,11 +34,11 @@ func NewStrip(client lifx.Client, min, max uint8, unitSize uint) Canvas {
 	}
 }
 
-func (c *strip) setColorZones(color lifx.HBSK, start, end uint8, fadeTime time.Duration) {
+func (c *strip) setColorZones(color lifx.HBSK, start, end uint8, fadeTime time.Duration) error {
 	start += c.min
 	end += c.min
 	log.Debugf("SetColorZones(%v, %v, %v, %v..%v, %v)", color.Hue, color.Saturation, color.Brightness, start, end, fadeTime)
-	c.client.SetColorZones(color, start, end, fadeTime)
+	return c.client.SetColorZones(color, start, end, fadeTime)
 }
 
 func (c *strip) Fill(color colorful.Color) {

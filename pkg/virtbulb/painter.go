@@ -4,6 +4,7 @@ import (
 	"fmt"
 
 	"github.com/dorkowscy/lyslix/lifx"
+	log "github.com/sirupsen/logrus"
 )
 
 type ErrUnsupportedPacket error
@@ -15,7 +16,8 @@ func PaintPacket(cv Canvas, packet *lifx.Packet) error {
 		cv.Draw(-1, -1, payload.Color)
 
 	case *lifx.SetColorZonesMessage:
-		cv.Draw(int(payload.StartIndex)-1, int(payload.EndIndex)-1, payload.Color)
+		log.Debugf("Draw(%d, %d, %v)", int(payload.StartIndex), int(payload.EndIndex), payload.Color)
+		cv.Draw(int(payload.StartIndex), int(payload.EndIndex), payload.Color)
 
 	default:
 		return ErrUnsupportedPacket(fmt.Errorf("unsupported packet type %T: %v", payload, payload))
