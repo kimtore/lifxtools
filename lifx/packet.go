@@ -39,6 +39,8 @@ func DecodePacket(r io.Reader) (*Packet, error) {
 		payload, err = DecodeSetLabelMessage(r)
 	case MsgTypeSetAccessPoint:
 		payload, err = DecodeSetAccessPointMessage(r)
+	case MsgTypeSetColorZonesMessage:
+		payload, err = DecodeSetColorZonesMessage(r)
 	case MsgTypeStateVersion:
 		payload = &StateVersionMessage{}
 		err = payload.Unmarshal(r)
