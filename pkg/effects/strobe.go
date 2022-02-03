@@ -15,8 +15,7 @@ type Strobe struct {
 	hue       float64
 	direction int
 	pos       int
-	angle     []float64
-	amplitude []float64
+	angle     float64
 	dots      []colorful.Color
 }
 
@@ -25,8 +24,6 @@ func init() {
 }
 
 func (e *Strobe) Init(pixels []colorful.Color) {
-	e.angle = make([]float64, len(pixels))
-	e.amplitude = make([]float64, len(pixels))
 	e.dots = make([]colorful.Color, len(pixels))
 	e.hue, _, _ = e.Color.Hcl()
 	e.direction = 1
@@ -39,23 +36,19 @@ func (e *Strobe) Draw(pixels []colorful.Color) {
 	h, c, l := e.Color.Hcl()
 	black := colorful.Hcl(h, 0.01, 0)
 	color := colorful.Hcl(e.hue, c, l)
-	delta := 180.0 / float64(e.Length+1)
+	angle := e.angle
+	deg := 180 / float64(len(pixels))
 
 	for i := range pixels {
-		if i == e.pos {
-			e.angle[i] = 180 - e.angle[i]
-			e.dots[i] = color
-		}
-		if e.angle[i] > 0 {
-			// Fade out a pixel that was generated earlier
-			amplitude := math.Sin(e.angle[i] / Rad)
-			pixels[i] = black.BlendHcl(e.dots[i], amplitude)
-			e.angle[i] -= delta
-		} else {
-			pixels[i] = black
-		}
+		amplitude := math.Sin(angle / Rad)
+		e.dots[i] = color
+		pixels[i] = black.BlendHcl(e.dots[i], amplitude)
+		angle += deg
 	}
 
+	e.angle = math.Mod(e.angle+1, 180.0)
+
+	return
 	// Reverse direction if at either end
 	e.pos += e.direction
 	if e.pos >= len(pixels) {
