@@ -20,6 +20,7 @@ type runner struct {
 }
 
 const (
+	initialDelay       = 10 * time.Millisecond
 	lifxProcessingTime = time.Millisecond * 10 // approximate latency added to messages
 )
 
@@ -30,7 +31,9 @@ func (r *runner) Run() {
 	r.effect.Init(pixels)
 	r.canvas.Set(pixels)
 	r.canvas.Draw(0)
-	t := time.NewTicker(10 * time.Millisecond)
+
+	t := time.NewTimer(initialDelay)
+	deadline := time.Now().Add(r.delay)
 
 	for {
 		select {
@@ -38,11 +41,13 @@ func (r *runner) Run() {
 			log.Warnf("[%s] STOPPED", r.name)
 			return
 		case <-t.C:
-			t.Reset(r.delay)
 			log.Debugf("[%s] RENDER %#v", r.name, r.effect)
 			r.effect.Draw(pixels)
 			r.canvas.Set(pixels)
-			r.canvas.Draw(r.delay - lifxProcessingTime)
+			duration := deadline.Sub(time.Now())
+			t.Reset(duration)
+			r.canvas.Draw(duration)
+			deadline = deadline.Add(r.delay)
 		}
 	}
 }
