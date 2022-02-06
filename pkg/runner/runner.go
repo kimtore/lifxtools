@@ -20,8 +20,7 @@ type runner struct {
 }
 
 const (
-	initialDelay       = 10 * time.Millisecond
-	lifxProcessingTime = time.Millisecond * 10 // approximate latency added to messages
+	initialDelay = 10 * time.Millisecond
 )
 
 func (r *runner) Run() {

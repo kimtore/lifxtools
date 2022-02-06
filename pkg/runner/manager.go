@@ -8,7 +8,6 @@ import (
 
 	"github.com/dorkowscy/lifxtool/pkg/canvas"
 	"github.com/dorkowscy/lifxtool/pkg/config"
-	"github.com/dorkowscy/lifxtool/pkg/effects"
 	"github.com/dorkowscy/lyslix/lifx"
 	log "github.com/sirupsen/logrus"
 )
@@ -37,26 +36,9 @@ func NewManager(
 	bulbs map[string]lifx.Client,
 ) Manager {
 
-	runners := make(map[string]*runner)
-	for preset := range presets {
-		eff, err := effects.NewFromConfig(presets[preset].Effect)
-		if err != nil {
-			log.Errorf("Initialize preset '%s': %s", preset, err)
-			continue
-		}
-
-		ctx, cancel := context.WithCancel(ctx)
-		cancel()
-
-		run := &runner{
-			ctx:    ctx,
-			cancel: cancel,
-			canvas: canvases[presets[preset].Canvas],
-			delay:  presets[preset].Delay,
-			effect: eff,
-			name:   presets[preset].Name,
-		}
-		runners[preset] = run
+	runners, err := initRunners(presets, canvases)
+	if err != nil {
+		log.Error(err)
 	}
 
 	return &manager{
