@@ -70,8 +70,8 @@ func (r *manager) StartPreset(preset string) error {
 		return ErrPresetNotFound
 	}
 
-	// Stop effect if it's already running
-	_ = r.StopPreset(preset)
+	// Stop effects already running on this canvas
+	r.stopCanvas(run.canvas)
 
 	run.ctx, run.cancel = context.WithCancel(r.ctx)
 
@@ -87,6 +87,14 @@ func (r *manager) StopPreset(preset string) error {
 	}
 	run.cancel()
 	return nil
+}
+
+func (r *manager) stopCanvas(cv canvas.Canvas) {
+	for preset := range r.runners {
+		if r.runners[preset].canvas == cv {
+			r.runners[preset].cancel()
+		}
+	}
 }
 
 func (r *manager) Exists(preset string) bool {
