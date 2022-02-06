@@ -33,14 +33,6 @@ func New(manager runner.Manager) *httpserver {
 	}
 }
 
-func (s *httpserver) Router() chi.Router {
-	r := chi.NewRouter()
-	r.Get("/{preset}", s.Query)
-	r.Put("/{preset}/active", s.Active)
-	r.Put("/{preset}/config/{option}", s.Configure)
-	return r
-}
-
 func (s *httpserver) Query(w http.ResponseWriter, r *http.Request) {
 	preset := chi.URLParam(r, "preset")
 
