@@ -56,6 +56,7 @@ Use this command only when connected to a LIFX bulb Wifi network.`,
 			"tcp", address,
 			&tls.Config{
 				InsecureSkipVerify: true,
+				MinVersion:         tls.VersionTLS10,
 			},
 		)
 		if err != nil {
