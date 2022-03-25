@@ -54,6 +54,10 @@ Use this command only when connected to a LIFX bulb Wifi network.`,
 				Timeout: time.Second * 5,
 			},
 			"tcp", address,
+			// First generation LIFX bulbs use TLS 1.0, which is broken.
+			// We need to explicitly enable it here.
+			// Note that this might be removed from Go in the future:
+			// https://github.com/golang/go/issues/45428
 			&tls.Config{
 				InsecureSkipVerify: true,
 				MinVersion:         tls.VersionTLS10,
