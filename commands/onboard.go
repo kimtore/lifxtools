@@ -5,12 +5,12 @@ import (
 	"crypto/tls"
 	"fmt"
 	"net"
-	"time"
 
-	"github.com/dorkowscy/lyslix/lifx"
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
+
+	"github.com/dorkowscy/lyslix/lifx"
 )
 
 // Change the label of a LIFX bulb.
@@ -27,6 +27,7 @@ Use this command only when connected to a LIFX bulb Wifi network.`,
 		ssid := viper.GetString("ssid")
 		psk := viper.GetString("psk")
 		address := viper.GetString("address")
+		timeout := viper.GetDuration("timeout")
 
 		if len(ssid) == 0 || len(psk) == 0 {
 			return fmt.Errorf("you must specify --ssid and --psk")
@@ -48,10 +49,10 @@ Use this command only when connected to a LIFX bulb Wifi network.`,
 			return err
 		}
 
-		log.Infof("Connecting to TCP %s...", address)
+		log.Infof("Connecting to TCP %s... (%s timeout)", address, timeout)
 		sock, err := tls.DialWithDialer(
 			&net.Dialer{
-				Timeout: time.Second * 5,
+				Timeout: timeout,
 			},
 			"tcp", address,
 			// First generation LIFX bulbs use TLS 1.0, which is broken.
@@ -95,4 +96,5 @@ func init() {
 	onboardCmd.Flags().String("address", "172.16.0.1:56700", "Network address of LIFX bulb")
 	onboardCmd.Flags().String("ssid", "", "Wifi SSID")
 	onboardCmd.Flags().String("psk", "", "Wifi pre-shared key")
+	onboardCmd.Flags().String("timeout", "15s", "TLS connection timeout")
 }
