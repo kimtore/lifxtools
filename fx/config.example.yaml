@@ -1,0 +1,90 @@
+# Global configuration options.
+# `debug` controls whether to print debugging messages to the console.
+options:
+  debug: false
+
+# Configure LIFX bulbs or LED strips.
+bulbs:
+  # Regular LIFX bulb, where `host` is the IP address or hostname to the bulb.
+  # The `name` field is only used internally by LIFXTOOL when setting up canvases.
+  - host: 192.168.0.100
+    name: my_lifx_bulb
+
+  # LIFX Z (LED strip). Same arguments as with regular bulbs, but here you must
+  # specify how many zones the strip is configured with. Each strip has eight zones,
+  # so for a LIFX Z configuration with three strips, use `24`.
+  - host: 192.168.0.101
+    name: my_lifx_led_strip
+    zone:
+      limit: 24
+
+# Configure canvases to paint light effects on.
+# A canvas consists of one or more bulbs or LED strips.
+# A LED strip can consist of either the whole strip, or just a section.
+# Effects can only be painted on canvases, so even if you have just a single bulb,
+# you must still configure a canvas.
+canvases:
+  # Create a canvas for a single bulb.
+  # Effects will only have a single "pixel" to paint on.
+  - name: bulb
+    bulbs:
+      - name: my_lifx_bulb
+
+  # Create a canvas for the entire LED strip.
+  # The LED strip will appear as a single "pixel".
+  - name: led_strip_as_one_bulb
+    bulbs:
+      - name: my_lifx_led_strip
+
+  # Create a canvas for the entire LED strip,
+  # The LED strip will appear to any effect as twenty-four individual pixels.
+  - name: led_strip
+    bulbs:
+      - name: my_lifx_led_strip
+        zone:
+          min: 1
+          max: 24
+
+  # Create a "composite" canvas that spans multiple lights.
+  # This canvas will have a total of two pixels.
+  - name: composite
+    bulbs:
+      - name: my_lifx_bulb
+      - name: my_lifx_led_strip
+
+  # Create a canvas for the LED strip, but reduce the number of pixels from 24 to 6.
+  # The `unitSize` parameter defines that each canvas pixel will draw four physical pixels.
+  - name: reduced_strip
+    bulbs:
+      - name: my_lifx_led_strip
+        zone:
+          min: 1
+          max: 24
+          unitSize: 4
+
+# Presets are canvas+effect configurations that can be started and stopped
+# using either the command-line or the HTTP API.
+#
+# `name` is used to identify the preset. This field must be unique.
+# `canvas` refers to the canvas name, defined in the canvases section.
+# `delay` configures how long to wait between every rendering of an effect frame.
+#
+# The parameters under `effect` are specific to the effects.
+# These are documented under the different effects, see *.go files in pkg/effects.
+#
+# Note that setting `delay` too low might result in too much traffic to
+# the light bulbs. LIFX's official recommendation is to not send more than
+# 20 packets per second to a single LIFX bulb. This means that the speed at
+# which you can run effects may vary greatly.
+#
+# It is safe to assume that anything above 200 ms will generally be fine.
+# You can try with lower values. If you experience glitches, try increasing the delay.
+presets:
+  - name: scary
+    canvas: composite
+    delay: 80ms
+    effect:
+      name: police
+      config:
+        chroma: 1
+        luminance: 0.2
